@@ -135,5 +135,16 @@ service cloud.firestore {
       allow read: if isBoardOrAdmin();
       allow write: if false;
     }
+
+    // =========================================================================
+    // 8. CONTENT MODERATION AUDIT LOG (moderationDecisionLog)
+    // Unified governance audit trail for event and project moderation decisions.
+    // Confidential: Read restricted strictly to board and admin accounts.
+    // Zero client writes: strictly written server-side by Cloud Functions.
+    // =========================================================================
+    match /moderationDecisionLog/{logId} {
+      allow read: if isBoardOrAdmin();
+      allow write: if false;
+    }
   }
 }

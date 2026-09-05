@@ -17,6 +17,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/clubs/club-detail.component').then((m) => m.ClubDetailComponent),
   },
   {
+    path: 'showcase',
+    loadComponent: () =>
+      import('./features/showcase/showcase-gallery.component').then((m) => m.ShowcaseGalleryComponent),
+  },
+  {
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
   },

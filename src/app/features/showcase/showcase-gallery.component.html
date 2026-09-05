@@ -1,0 +1,323 @@
+<div class="showcase-container">
+  <!-- Page Header -->
+  <header class="showcase-header">
+    <div class="header-content">
+      <span class="badge badge-accent">National Showcase</span>
+      <h1 class="h1">Student Innovation & Tech Showcase</h1>
+      <p class="body-text text-muted">
+        Discover verified projects, scientific prototypes, and software built by Algerian university student clubs.
+      </p>
+      <div class="section-divider"></div>
+    </div>
+  </header>
+
+  <!-- Filter & Search Toolbar -->
+  <section class="filters-card card" aria-label="Showcase Filters">
+    <div class="filters-top">
+      <!-- Search Input -->
+      <div class="search-box">
+        <label for="project-search" class="visually-hidden">Search projects</label>
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input
+            id="project-search"
+            type="search"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()"
+            placeholder="Search by project title, team, or keyword..."
+            class="form-input search-input"
+          />
+        </div>
+      </div>
+
+      <!-- University Filter -->
+      <div class="university-filter">
+        <label for="univ-select" class="visually-hidden">Filter by University</label>
+        <select
+          id="univ-select"
+          [(ngModel)]="selectedUniversity"
+          (change)="onFilterChange()"
+          class="form-select"
+        >
+          <option value="all">All Algerian Universities</option>
+          @for (univ of universities; track univ) {
+            <option [value]="univ">{{ univ }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Tag Pills -->
+    <div class="tag-pills" role="radiogroup" aria-label="Filter by Topic Tag">
+      @for (tag of tags; track tag.key) {
+        <button
+          type="button"
+          class="pill-btn"
+          [class.active]="selectedTag === tag.key"
+          (click)="selectTag(tag.key)"
+          role="radio"
+          [attr.aria-checked]="selectedTag === tag.key"
+        >
+          {{ tag.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Live Status & Results Area -->
+  <section class="results-section" aria-live="polite">
+    <!-- Loading State: Skeletons -->
+    @if (isLoading()) {
+      <div class="projects-grid">
+        @for (item of [1,2,3,4,5,6]; track item) {
+          <div class="card skeleton-card">
+            <div class="skeleton skeleton-thumb"></div>
+            <div class="skeleton-meta">
+              <div class="skeleton skeleton-tag"></div>
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text-short"></div>
+            </div>
+            <div class="skeleton skeleton-btn"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Content State: Project Cards -->
+    @if (!isLoading() && projects().length > 0) {
+      <div class="projects-grid">
+        @for (project of projects(); track project.id || project.title) {
+          <article class="card project-card" (click)="openProjectModal(project)">
+            <!-- Thumbnail / Header Banner -->
+            <div class="project-media-wrapper">
+              @if (project.imageUrls && project.imageUrls.length > 0) {
+                <img
+                  [src]="project.imageUrls[0]"
+                  [alt]="project.title"
+                  class="project-thumb"
+                  loading="lazy"
+                />
+              } @else {
+                <div class="project-thumb-placeholder">
+                  <span class="project-icon-placeholder">&#9881;</span>
+                </div>
+              }
+              <span class="badge badge-success project-status-badge">Approved</span>
+            </div>
+
+            <!-- Content Details -->
+            <div class="project-card-body">
+              <div class="project-org-meta">
+                <span class="club-attribution">{{ project.clubName || 'Student Club' }}</span>
+                @if (project.university) {
+                  <span class="university-attribution">&bull; {{ project.university }}</span>
+                }
+              </div>
+
+              <h2 class="project-title">{{ project.title }}</h2>
+
+              <p class="project-description-preview">
+                {{ project.description }}
+              </p>
+
+              <!-- Tags -->
+              @if (project.tags && project.tags.length > 0) {
+                <div class="project-tags">
+                  @for (t of project.tags.slice(0, 3); track t) {
+                    <span class="tag-badge">#{{ t }}</span>
+                  }
+                  @if (project.tags.length > 3) {
+                    <span class="tag-badge tag-more">+{{ project.tags.length - 3 }}</span>
+                  }
+                </div>
+              }
+
+              <!-- Team Attribution -->
+              @if (project.team && project.team.length > 0) {
+                <div class="project-team-preview">
+                  <span class="team-label">Team:</span>
+                  <span class="team-names">{{ project.team.join(', ') }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Footer Action -->
+            <div class="project-card-footer">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm full-width"
+                (click)="openProjectModal(project); $event.stopPropagation()"
+              >
+                View Project Details
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- Cursor Pagination: Load More -->
+      @if (hasMore()) {
+        <div class="pagination-wrapper">
+          <button
+            type="button"
+            class="btn btn-secondary load-more-btn"
+            (click)="loadMore()"
+            [disabled]="isLoadingMore()"
+          >
+            @if (isLoadingMore()) {
+              <span class="spinner-sm" aria-hidden="true"></span>
+              <span>Loading more projects...</span>
+            } @else {
+              <span>Load More Projects</span>
+            }
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Empty State: Zero Results for Search/Filter -->
+    @if (!isLoading() && projects().length === 0) {
+      <div class="empty-state card">
+        <div class="empty-icon" aria-hidden="true">&#128269;</div>
+        <h3 class="h3">No Projects Found</h3>
+        <p class="body-text text-muted">
+          No student projects match your selected filters. Try broadening your search or selecting another topic.
+        </p>
+        <button type="button" class="btn btn-primary" (click)="resetFilters()">
+          Reset All Filters
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- Project Detail Inspection Modal -->
+  @if (selectedProject()) {
+    <div class="modal-backdrop" (click)="closeProjectModal()" role="dialog" aria-modal="true">
+      <div class="modal-dialog card" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div>
+            <div class="modal-meta-line">
+              <span class="badge badge-accent">{{ selectedProject()?.clubName || 'Student Club' }}</span>
+              @if (selectedProject()?.university) {
+                <span class="modal-univ">{{ selectedProject()?.university }}</span>
+              }
+            </div>
+            <h2 class="h2 modal-title">{{ selectedProject()?.title }}</h2>
+          </div>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="closeProjectModal()"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <!-- Gallery Carousel / Grid -->
+          @if (selectedProject()?.imageUrls && (selectedProject()?.imageUrls)!.length > 0) {
+            <div class="modal-gallery">
+              @for (img of selectedProject()?.imageUrls; track img) {
+                <div class="gallery-image-frame">
+                  <img [src]="img" [alt]="selectedProject()?.title" class="gallery-img" />
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Project Team Roster -->
+          @if (selectedProject()?.team && (selectedProject()?.team)!.length > 0) {
+            <div class="modal-section">
+              <h4 class="modal-section-heading">Student Team Members</h4>
+              <div class="team-chips">
+                @for (member of selectedProject()?.team; track member) {
+                  <span class="chip chip-student">&#128100; {{ member }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Tags -->
+          @if (selectedProject()?.tags && (selectedProject()?.tags)!.length > 0) {
+            <div class="modal-section">
+              <h4 class="modal-section-heading">Topics & Technologies</h4>
+              <div class="tags-row">
+                @for (tag of selectedProject()?.tags; track tag) {
+                  <span class="tag-badge">#{{ tag }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Full Description -->
+          <div class="modal-section">
+            <h4 class="modal-section-heading">Project Overview</h4>
+            <p class="modal-description-text">{{ selectedProject()?.description }}</p>
+          </div>
+
+          <!-- Project External Links -->
+          @if (selectedProject()?.links) {
+            <div class="modal-section modal-links-section">
+              <h4 class="modal-section-heading">Resources & Repository</h4>
+              <div class="links-row">
+                @if (selectedProject()?.links?.github) {
+                  <a
+                    [href]="selectedProject()?.links?.github"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary btn-sm external-link"
+                  >
+                    <span>View GitHub Repo</span> &rarr;
+                  </a>
+                }
+                @if (selectedProject()?.links?.demo) {
+                  <a
+                    [href]="selectedProject()?.links?.demo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-primary btn-sm external-link"
+                  >
+                    <span>Launch Live Demo</span> &rarr;
+                  </a>
+                }
+                @if (selectedProject()?.links?.paper) {
+                  <a
+                    [href]="selectedProject()?.links?.paper"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary btn-sm external-link"
+                  >
+                    <span>Read Paper / Docs</span> &rarr;
+                  </a>
+                }
+                @if (selectedProject()?.links?.video) {
+                  <a
+                    [href]="selectedProject()?.links?.video"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary btn-sm external-link"
+                  >
+                    <span>Watch Demo Video</span> &rarr;
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeProjectModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -299,7 +299,30 @@ Simultaneous or closely scheduled events across Algerian student societies cause
 - If an approved event exists within the window, set `status: 'flagged_conflict'` (instead of `'pending'`) and store a descriptive `conflictContext` identifying the conflicting event's title and scheduled date.
 - The event is queued for board attention and remains unlisted publicly until explicitly approved by the board, while the club lead sees clear explanatory feedback on their dashboard.
 
+---
 
+## ADR 023: Content Moderation Governance & Immutable Audit Logging (`moderationDecisionLog`)
 
+### Context
+Public visibility on the NACS platform for both events and student showcase projects requires strict federation oversight. Leaving approval or rejection logic to direct client writes creates critical security vulnerabilities. Moreover, governance accountability requires every moderation decision to be immutable and attributed.
 
+### Decision
+- Content moderation for events and projects is handled exclusively by callable Cloud Functions: `approveEvent`, `rejectEvent`, `approveProject`, and `rejectProject`.
+- Every handler enforces server-side caller role validation (`verifyBoardOrAdmin`) reading `users/{callerUid}`.
+- Rejection of any item strictly requires a non-empty, non-whitespace justification `reason` validated at the Cloud Function boundary.
+- Every approval and rejection atomically writes an immutable audit record to `moderationDecisionLog/{logId}` capturing:
+  `{ targetId, targetType: 'event' | 'project', decision: 'approved' | 'rejected', decidedBy, clubId, title, previousStatus, reason, conflictContext, timestamp }`.
+- Direct client writes to `moderationDecisionLog` are denied (`allow write: if false;`); reads are restricted strictly to board/admin officers.
 
+---
+
+## ADR 024: Board Resolution Policy for Proximity Conflicts (`flagged_conflict` review)
+
+### Context
+Events flagged with `status == 'flagged_conflict'` by the automated 3-day proximity detector require human evaluation. Some events may occur on the same date but cater to completely different university audiences or geographic wilayas (e.g. Oran vs. Constantine), making prohibition counterproductive.
+
+### Decision
+- The NACS Board possesses full authority to approve a `flagged_conflict` event ("Approve Anyway").
+- The board interface displays the detailed `conflictContext` identifying the conflicting event and scheduled dates.
+- When approved, `approveEvent` transitions the event status directly to `'approved'` and records in `moderationDecisionLog` that the board consciously resolved the proximity conflict.
+- If the board determines the conflict is unmanageable, they execute `rejectEvent` with a mandatory explanation advising the club lead on viable alternative scheduling windows.

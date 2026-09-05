@@ -1,4 +1,4 @@
-export type ProjectStatus = 'pending' | 'approved';
+export type ProjectStatus = 'pending' | 'approved' | 'rejected';
 
 export interface ProjectLinks {
   github?: string;
@@ -11,6 +11,7 @@ export interface StudentProject {
   id?: string;
   clubId: string;
   clubName?: string;
+  university?: string;
   title: string;
   team: string[]; // member names
   description: string;
@@ -20,4 +21,7 @@ export interface StudentProject {
   status: ProjectStatus;
   submittedBy: string; // uid
   submittedAt: string | number | any;
+  reviewedBy?: string;
+  reviewedAt?: string | number | any;
+  rejectionReason?: string;
 }

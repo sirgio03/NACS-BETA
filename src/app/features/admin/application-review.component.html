@@ -3,13 +3,47 @@
   <header class="portal-header">
     <div class="header-titles">
       <span class="badge badge-accent">Board of Directors &amp; Administration</span>
-      <h1 class="h1">Society Affiliation Applications</h1>
+      <h1 class="h1">National Content &amp; Governance Center</h1>
       <p class="body-text text-muted">
-        Review club membership petitions. Approvals atomically provision official society records; rejections require mandatory governance justification.
+        Review society affiliations, moderate club events with conflict resolution, and curate student showcase projects.
       </p>
       <div class="section-divider"></div>
     </div>
   </header>
+
+  <!-- Section Switcher Tabs -->
+  <nav class="main-sections-nav" aria-label="Moderation Center Sections">
+    <button
+      type="button"
+      class="section-btn"
+      [class.active]="activeSection() === 'applications'"
+      (click)="setSection('applications')"
+    >
+      Society Applications
+    </button>
+    <button
+      type="button"
+      class="section-btn"
+      [class.active]="activeSection() === 'events'"
+      (click)="setSection('events')"
+    >
+      Event Moderation
+      @if (pendingEvents().length > 0) {
+        <span class="count-pill">{{ pendingEvents().length }}</span>
+      }
+    </button>
+    <button
+      type="button"
+      class="section-btn"
+      [class.active]="activeSection() === 'projects'"
+      (click)="setSection('projects')"
+    >
+      Project Showcase Moderation
+      @if (pendingProjects().length > 0) {
+        <span class="count-pill">{{ pendingProjects().length }}</span>
+      }
+    </button>
+  </nav>
 
   <!-- Action Feedback Notification -->
   @if (actionFeedback(); as feedback) {
@@ -24,291 +58,526 @@
     </aside>
   }
 
-  <!-- Stats Header Widget -->
-  <section class="stats-row" aria-label="Application Metrics">
-    <div class="stat-card card">
-      <span class="stat-label">Pending Review</span>
-      <span class="stat-number text-pending">{{ stats().pending }}</span>
-      <span class="stat-subtext text-small text-muted">Oldest-first queue</span>
-    </div>
-    <div class="stat-card card">
-      <span class="stat-label">Approved Societies</span>
-      <span class="stat-number text-success">{{ stats().approved }}</span>
-      <span class="stat-subtext text-small text-muted">Provisioned &amp; active</span>
-    </div>
-    <div class="stat-card card">
-      <span class="stat-label">Turned Away</span>
-      <span class="stat-number text-danger">{{ stats().rejected }}</span>
-      <span class="stat-subtext text-small text-muted">Justified in decision log</span>
-    </div>
-    <div class="stat-card card">
-      <span class="stat-label">Total Petitions</span>
-      <span class="stat-number">{{ stats().total }}</span>
-      <span class="stat-subtext text-small text-muted">Since inception</span>
-    </div>
-  </section>
-
-  <!-- Queue Filter Tabs -->
-  <nav class="tabs-nav" aria-label="Filter Queue by Status">
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab === 'pending'"
-      (click)="onTabChange('pending')"
-    >
-      Pending Review ({{ stats().pending }})
-    </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab === 'approved'"
-      (click)="onTabChange('approved')"
-    >
-      Approved ({{ stats().approved }})
-    </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab === 'rejected'"
-      (click)="onTabChange('rejected')"
-    >
-      Rejected ({{ stats().rejected }})
-    </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab === 'all'"
-      (click)="onTabChange('all')"
-    >
-      All Applications ({{ stats().total }})
-    </button>
-  </nav>
-
-  <!-- Content Section -->
-  <section class="applications-content" aria-live="polite">
-    @if (isLoading()) {
-      <!-- Skeletons -->
-      <div class="skeletons-list">
-        @for (i of [1,2,3]; track i) {
-          <div class="card skeleton-card">
-            <div class="skeleton skeleton-row-lg"></div>
-            <div class="skeleton skeleton-row-md"></div>
-          </div>
-        }
+  <!-- ========================================================================= -->
+  <!-- SECTION 1: APPLICATIONS QUEUE -->
+  <!-- ========================================================================= -->
+  @if (activeSection() === 'applications') {
+    <!-- Stats Header Widget -->
+    <section class="stats-row" aria-label="Application Metrics">
+      <div class="stat-card card">
+        <span class="stat-label">Pending Review</span>
+        <span class="stat-number text-pending">{{ stats().pending }}</span>
+        <span class="stat-subtext text-small text-muted">Oldest-first queue</span>
       </div>
-    } @else if (applications().length > 0) {
-      <!-- Applications Queue Table / Cards -->
-      <div class="queue-list">
-        @for (app of applications(); track app.id) {
-          <article class="application-item card">
-            <div class="item-main">
-              <div class="item-header">
-                <div class="badges-group">
+      <div class="stat-card card">
+        <span class="stat-label">Approved Societies</span>
+        <span class="stat-number text-success">{{ stats().approved }}</span>
+        <span class="stat-subtext text-small text-muted">Provisioned &amp; active</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">Turned Away</span>
+        <span class="stat-number text-danger">{{ stats().rejected }}</span>
+        <span class="stat-subtext text-small text-muted">Justified in decision log</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">Total Petitions</span>
+        <span class="stat-number">{{ stats().total }}</span>
+        <span class="stat-subtext text-small text-muted">Since inception</span>
+      </div>
+    </section>
+
+    <!-- Sub-status Tabs -->
+    <nav class="tabs-nav" aria-label="Filter Applications by Status">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab === 'pending'"
+        (click)="onTabChange('pending')"
+      >
+        Pending Review ({{ stats().pending }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab === 'approved'"
+        (click)="onTabChange('approved')"
+      >
+        Approved ({{ stats().approved }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab === 'rejected'"
+        (click)="onTabChange('rejected')"
+      >
+        Rejected ({{ stats().rejected }})
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab === 'all'"
+        (click)="onTabChange('all')"
+      >
+        All Applications ({{ stats().total }})
+      </button>
+    </nav>
+
+    <!-- Applications List -->
+    <section class="queue-content" aria-live="polite">
+      @if (isLoading()) {
+        <div class="skeletons-list">
+          @for (i of [1,2,3]; track i) {
+            <div class="card skeleton-card">
+              <div class="skeleton skeleton-row-lg"></div>
+              <div class="skeleton skeleton-row-md"></div>
+            </div>
+          }
+        </div>
+      } @else if (applications().length > 0) {
+        <div class="applications-table card">
+          <div class="table-header">
+            <span class="col-club">Society &amp; University</span>
+            <span class="col-cat">Category</span>
+            <span class="col-date">Submitted</span>
+            <span class="col-status">Status</span>
+            <span class="col-actions">Actions</span>
+          </div>
+          <div class="table-body">
+            @for (app of applications(); track app.id) {
+              <div class="table-row">
+                <div class="col-club">
+                  <span class="club-name">{{ app.clubName }}</span>
+                  <span class="univ-name text-muted">{{ app.university }}</span>
+                </div>
+                <div class="col-cat">
+                  <span class="badge badge-accent">{{ app.submittedData.category || 'general' }}</span>
+                </div>
+                <div class="col-date text-muted">
+                  {{ app.createdAt | date:'mediumDate' }}
+                </div>
+                <div class="col-status">
                   <span
                     class="badge"
                     [class.badge-pending]="app.status === 'pending'"
-                    [class.badge-approved]="app.status === 'approved'"
-                    [class.badge-flagged]="app.status === 'rejected'"
+                    [class.badge-success]="app.status === 'approved'"
+                    [class.badge-danger]="app.status === 'rejected'"
                   >
-                    {{ app.status | uppercase }}
+                    {{ app.status }}
                   </span>
-                  <span class="badge badge-accent">{{ app.submittedData.category | uppercase }}</span>
                 </div>
-                <h2 class="h3 club-title">{{ app.clubName }}</h2>
-                <p class="university-text text-small text-muted">{{ app.university }}</p>
+                <div class="col-actions">
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="openDetailModal(app)"
+                  >
+                    Inspect
+                  </button>
+                  @if (app.status === 'pending') {
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="onApprove(app)"
+                      [disabled]="isSubmittingAction()"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      (click)="openRejectModal('application', app.id!, app.clubName)"
+                      [disabled]="isSubmittingAction()"
+                    >
+                      Reject
+                    </button>
+                  }
+                </div>
               </div>
-
-              <div class="item-meta">
-                <div class="meta-field">
-                  <span class="field-label">Applicant / Lead:</span>
-                  <span class="field-val">{{ app.submittedData.leadName || 'Unnamed' }}</span>
-                </div>
-                <div class="meta-field">
-                  <span class="field-label">Official Contact:</span>
-                  <span class="field-val">{{ app.contactEmail }}</span>
-                </div>
-                <div class="meta-field">
-                  <span class="field-label">Submitted On:</span>
-                  <span class="field-val">{{ app.createdAt ? (app.createdAt.toDate ? (app.createdAt.toDate() | date:'mediumDate') : (app.createdAt | date:'mediumDate')) : 'Recent' }}</span>
-                </div>
-              </div>
-
-              <p class="item-description body-text">
-                {{ app.submittedData.description }}
-              </p>
-
-              @if (app.status === 'rejected' && app.rejectionReason) {
-                <div class="rejection-note">
-                  <span class="note-label">Rejection Justification:</span>
-                  <span class="note-text">{{ app.rejectionReason }}</span>
-                </div>
-              }
-            </div>
-
-            <div class="item-actions">
-              <button
-                type="button"
-                class="btn btn-outline btn-sm"
-                (click)="openDetailModal(app)"
-              >
-                Inspect Dossier
-              </button>
-
-              @if (app.status === 'pending') {
-                <button
-                  type="button"
-                  class="btn btn-primary btn-sm"
-                  (click)="onApprove(app)"
-                  [disabled]="isSubmittingAction()"
-                >
-                  Approve Society
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-danger btn-sm"
-                  (click)="openRejectModal(app)"
-                  [disabled]="isSubmittingAction()"
-                >
-                  Turn Away
-                </button>
-              }
-            </div>
-          </article>
-        }
-      </div>
-    } @else {
-      <!-- Empty States -->
-      @if (activeTab === 'pending') {
-        <div class="card empty-state-positive">
-          <div class="check-glyph">&check;</div>
-          <h2 class="h2">Queue Clear &mdash; All Applications Reviewed</h2>
-          <p class="body-text text-muted">
-            There are currently no pending club membership applications requiring board inspection.
-          </p>
+            }
+          </div>
         </div>
       } @else {
-        <div class="card empty-state-neutral">
-          <h2 class="h2">No Applications Found</h2>
-          <p class="body-text text-muted">
-            No applications match the selected status criteria.
-          </p>
+        <div class="empty-state card">
+          <div class="empty-icon" aria-hidden="true">&#9989;</div>
+          <h3 class="h3">No Applications in this Queue</h3>
+          <p class="body-text text-muted">There are currently no club affiliation applications with status "{{ activeTab }}".</p>
         </div>
       }
-    }
-  </section>
+    </section>
+  }
 
-  <!-- Application Detail Modal -->
-  @if (selectedApplication(); as selectedApp) {
-    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-card card">
-        <header class="modal-header">
-          <div>
-            <div class="badges-group">
-              <span
-                class="badge"
-                [class.badge-pending]="selectedApp.status === 'pending'"
-                [class.badge-approved]="selectedApp.status === 'approved'"
-                [class.badge-flagged]="selectedApp.status === 'rejected'"
-              >
-                {{ selectedApp.status | uppercase }}
-              </span>
-              <span class="badge badge-accent">{{ selectedApp.submittedData.category | uppercase }}</span>
+  <!-- ========================================================================= -->
+  <!-- SECTION 2: EVENT MODERATION QUEUE -->
+  <!-- ========================================================================= -->
+  @if (activeSection() === 'events') {
+    <section class="queue-content" aria-live="polite">
+      @if (isLoading()) {
+        <div class="skeletons-list">
+          @for (i of [1,2,3]; track i) {
+            <div class="card skeleton-card">
+              <div class="skeleton skeleton-row-lg"></div>
+              <div class="skeleton skeleton-row-md"></div>
             </div>
-            <h2 id="modal-title" class="h2">{{ selectedApp.clubName }}</h2>
-            <p class="text-muted text-small">{{ selectedApp.university }}</p>
-          </div>
-          <button type="button" class="modal-close" (click)="closeDetailModal()">&times;</button>
-        </header>
-
-        <div class="modal-body">
-          <section class="dossier-section">
-            <h3 class="h4">Submitted Profile &amp; Motivation</h3>
-            <p class="body-text">{{ selectedApp.submittedData.description }}</p>
-            @if (selectedApp.submittedData.motivation) {
-              <p class="body-text text-muted"><em>Motivation:</em> {{ selectedApp.submittedData.motivation }}</p>
-            }
-          </section>
-
-          <section class="dossier-section">
-            <h3 class="h4">Officer &amp; Verification Details</h3>
-            <div class="dossier-grid">
-              <div><strong>Lead Officer:</strong> {{ selectedApp.submittedData.leadName }}</div>
-              <div><strong>Official Email:</strong> {{ selectedApp.contactEmail }}</div>
-              <div><strong>Phone Number:</strong> {{ selectedApp.submittedData.leadPhone || 'Not provided' }}</div>
-              <div><strong>Founding Date:</strong> {{ selectedApp.submittedData.foundingDate || 'Not specified' }}</div>
-            </div>
-          </section>
-
-          @if (selectedApp.status === 'rejected' && selectedApp.rejectionReason) {
-            <section class="dossier-section rejection-box">
-              <h3 class="h4 text-danger">Rejection Justification</h3>
-              <p class="body-text">{{ selectedApp.rejectionReason }}</p>
-            </section>
           }
         </div>
+      } @else if (pendingEvents().length > 0) {
+        <div class="events-moderation-list">
+          @for (event of pendingEvents(); track event.id) {
+            <article class="card event-mod-card" [class.is-conflict]="event.status === 'flagged_conflict'">
+              <div class="event-mod-header">
+                <div>
+                  <div class="event-meta-line">
+                    <span class="badge badge-accent">{{ event.clubName || 'Student Club' }}</span>
+                    <span class="badge" [class.badge-danger]="event.status === 'flagged_conflict'" [class.badge-pending]="event.status === 'pending'">
+                      {{ event.status === 'flagged_conflict' ? 'Schedule Conflict' : 'Pending Review' }}
+                    </span>
+                    <span class="badge badge-secondary">{{ event.type }}</span>
+                  </div>
+                  <h2 class="h2 event-title">{{ event.title }}</h2>
+                </div>
+                <div class="event-date-box">
+                  <span class="date-display">{{ event.date | date:'mediumDate' }}</span>
+                  <span class="location-display">&#128205; {{ event.location }}</span>
+                </div>
+              </div>
 
-        <footer class="modal-footer">
-          <button type="button" class="btn btn-outline" (click)="closeDetailModal()">
-            Close Dossier
-          </button>
-          @if (selectedApp.status === 'pending') {
+              <!-- Conflict Alert Callout for Board Inspection -->
+              @if (event.status === 'flagged_conflict') {
+                <div class="conflict-alert-box">
+                  <span class="conflict-icon" aria-hidden="true">&#9888;</span>
+                  <div class="conflict-content">
+                    <strong class="conflict-heading">Federation Proximity Conflict Detected (+/- 3 Days)</strong>
+                    <p class="conflict-desc">{{ event.conflictContext }}</p>
+                    <span class="conflict-policy-note">
+                      Board Policy: You have authority to approve if targeted audiences or wilayas do not collide.
+                    </span>
+                  </div>
+                </div>
+              }
+
+              <p class="event-desc-text">{{ event.description }}</p>
+
+              <!-- Event Action Buttons -->
+              <div class="mod-actions-footer">
+                @if (event.status === 'flagged_conflict') {
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    (click)="onApproveEvent(event)"
+                    [disabled]="isSubmittingAction()"
+                  >
+                    Approve Anyway (Override Flag)
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    (click)="onApproveEvent(event)"
+                    [disabled]="isSubmittingAction()"
+                  >
+                    Approve Event
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="openRejectModal('event', event.id!, event.title)"
+                  [disabled]="isSubmittingAction()"
+                >
+                  Reject Event
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state card">
+          <div class="empty-icon" aria-hidden="true">&#127881;</div>
+          <h3 class="h3">All Events Cleared</h3>
+          <p class="body-text text-muted">There are no pending or flagged events awaiting board moderation.</p>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 3: PROJECT SHOWCASE MODERATION QUEUE -->
+  <!-- ========================================================================= -->
+  @if (activeSection() === 'projects') {
+    <section class="queue-content" aria-live="polite">
+      @if (isLoading()) {
+        <div class="skeletons-list">
+          @for (i of [1,2,3]; track i) {
+            <div class="card skeleton-card">
+              <div class="skeleton skeleton-row-lg"></div>
+              <div class="skeleton skeleton-row-md"></div>
+            </div>
+          }
+        </div>
+      } @else if (pendingProjects().length > 0) {
+        <div class="projects-moderation-list">
+          @for (project of pendingProjects(); track project.id) {
+            <article class="card project-mod-card">
+              <div class="project-mod-header">
+                <div>
+                  <div class="project-meta-line">
+                    <span class="badge badge-accent">{{ project.clubName || 'Student Club' }}</span>
+                    <span class="badge badge-pending">Pending Showcase Review</span>
+                  </div>
+                  <h2 class="h2 project-title">{{ project.title }}</h2>
+                </div>
+                <div class="submission-date text-muted">
+                  Submitted: {{ project.submittedAt | date:'mediumDate' }}
+                </div>
+              </div>
+
+              <!-- Team Attribution -->
+              @if (project.team && project.team.length > 0) {
+                <div class="team-preview">
+                  <span class="team-label">Student Authors:</span>
+                  <span class="team-names">{{ project.team.join(', ') }}</span>
+                </div>
+              }
+
+              <!-- Tags -->
+              @if (project.tags && project.tags.length > 0) {
+                <div class="tags-preview">
+                  @for (t of project.tags; track t) {
+                    <span class="tag-badge">#{{ t }}</span>
+                  }
+                </div>
+              }
+
+              <p class="project-desc-snippet">{{ project.description }}</p>
+
+              <!-- Gallery & Links Summary -->
+              <div class="assets-summary text-muted">
+                <span>&#128247; {{ project.imageUrls.length }} images</span>
+                @if (project.links.github) {
+                  <span>&bull; <a [href]="project.links.github" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+                }
+                @if (project.links.demo) {
+                  <span>&bull; <a [href]="project.links.demo" target="_blank" rel="noopener noreferrer">Live Demo</a></span>
+                }
+              </div>
+
+              <!-- Project Action Buttons -->
+              <div class="mod-actions-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="openProjectDetail(project)"
+                >
+                  Inspect Full Details
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="onApproveProject(project)"
+                  [disabled]="isSubmittingAction()"
+                >
+                  Approve for Showcase
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="openRejectModal('project', project.id!, project.title)"
+                  [disabled]="isSubmittingAction()"
+                >
+                  Reject Project
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state card">
+          <div class="empty-icon" aria-hidden="true">&#9989;</div>
+          <h3 class="h3">Showcase Queue Clear</h3>
+          <p class="body-text text-muted">There are no pending student project submissions requiring moderation.</p>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: APPLICATION DETAIL INSPECTION -->
+  <!-- ========================================================================= -->
+  @if (selectedApplication(); as app) {
+    <div class="modal-backdrop" (click)="closeDetailModal()" role="dialog" aria-modal="true">
+      <div class="modal-dialog card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <span class="badge badge-accent">{{ app.submittedData.category || 'General' }}</span>
+            <h2 class="h2 modal-title">{{ app.clubName }}</h2>
+            <span class="univ-subtitle text-muted">{{ app.university }}</span>
+          </div>
+          <button type="button" class="btn-close" (click)="closeDetailModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-section">
+            <h4 class="detail-heading">Society Description</h4>
+            <p class="body-text">{{ app.submittedData.description }}</p>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="item-label">Contact Email</span>
+              <span class="item-value">{{ app.contactEmail }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="item-label">Founding Date</span>
+              <span class="item-value">{{ app.submittedData.foundingDate || 'Not specified' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="item-label">Designated Lead</span>
+              <span class="item-value">{{ app.submittedData.leadName || 'Not specified' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="item-label">Lead Phone</span>
+              <span class="item-value">{{ app.submittedData.leadPhone || 'Not specified' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Close</button>
+          @if (app.status === 'pending') {
             <button
               type="button"
               class="btn btn-danger"
-              (click)="openRejectModal(selectedApp)"
+              (click)="openRejectModal('application', app.id!, app.clubName)"
               [disabled]="isSubmittingAction()"
             >
-              Turn Away
+              Reject
             </button>
             <button
               type="button"
               class="btn btn-primary"
-              (click)="onApprove(selectedApp)"
+              (click)="onApprove(app)"
               [disabled]="isSubmittingAction()"
             >
               Approve Society
             </button>
           }
-        </footer>
+        </div>
       </div>
     </div>
   }
 
-  <!-- Mandatory Rejection Justification Modal -->
-  @if (rejectionTarget(); as target) {
-    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="reject-title">
-      <div class="modal-card card modal-reject">
-        <header class="modal-header">
+  <!-- ========================================================================= -->
+  <!-- MODAL: PROJECT DETAIL INSPECTION -->
+  <!-- ========================================================================= -->
+  @if (selectedProject(); as proj) {
+    <div class="modal-backdrop" (click)="closeProjectDetail()" role="dialog" aria-modal="true">
+      <div class="modal-dialog card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
           <div>
-            <h2 id="reject-title" class="h3">Reject Society Application</h2>
-            <p class="text-muted text-small">Club: <strong>{{ target.clubName }}</strong> ({{ target.university }})</p>
+            <span class="badge badge-accent">{{ proj.clubName || 'Student Club' }}</span>
+            <h2 class="h2 modal-title">{{ proj.title }}</h2>
           </div>
-          <button type="button" class="modal-close" (click)="closeRejectModal()">&times;</button>
-        </header>
+          <button type="button" class="btn-close" (click)="closeProjectDetail()">&times;</button>
+        </div>
 
         <div class="modal-body">
-          <p class="text-small text-muted">
-            NACS governance accountability strictly requires a documented reason for turning away a student club. This justification is permanently recorded in the immutable decision audit log.
+          @if (proj.imageUrls && proj.imageUrls.length > 0) {
+            <div class="modal-gallery">
+              @for (img of proj.imageUrls; track img) {
+                <div class="gallery-image-frame">
+                  <img [src]="img" [alt]="proj.title" class="gallery-img" />
+                </div>
+              }
+            </div>
+          }
+
+          <div class="detail-section">
+            <h4 class="detail-heading">Student Authors</h4>
+            <div class="chips-row">
+              @for (member of proj.team; track member) {
+                <span class="chip">&#128100; {{ member }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4 class="detail-heading">Project Description</h4>
+            <p class="body-text">{{ proj.description }}</p>
+          </div>
+
+          @if (proj.links) {
+            <div class="detail-section">
+              <h4 class="detail-heading">Links &amp; Resources</h4>
+              <div class="links-row">
+                @if (proj.links.github) {
+                  <a [href]="proj.links.github" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">GitHub Repo</a>
+                }
+                @if (proj.links.demo) {
+                  <a [href]="proj.links.demo" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Live Demo</a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeProjectDetail()">Close</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="openRejectModal('project', proj.id!, proj.title)"
+            [disabled]="isSubmittingAction()"
+          >
+            Reject
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onApproveProject(proj)"
+            [disabled]="isSubmittingAction()"
+          >
+            Approve for Showcase
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- UNIFIED REJECTION MODAL (MANDATORY REASON) -->
+  <!-- ========================================================================= -->
+  @if (rejectionTarget(); as target) {
+    <div class="modal-backdrop" (click)="closeRejectModal()" role="dialog" aria-modal="true">
+      <div class="modal-dialog card rejection-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="h3 modal-title text-danger">Confirm Rejection: {{ target.title }}</h3>
+          <button type="button" class="btn-close" (click)="closeRejectModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p class="body-text">
+            Rejection requires a mandatory justification. This reason will be archived in the governance audit decision log.
           </p>
 
           <div class="form-group">
-            <label for="reject-reason" class="form-label font-bold">
-              Justification / Reason (Mandatory):
+            <label for="rejection-reason" class="form-label">
+              Justification Reason <span class="required-asterisk">*</span>
             </label>
             <textarea
-              id="reject-reason"
-              [(ngModel)]="rejectionReason"
+              id="rejection-reason"
               rows="4"
-              class="form-input reason-textarea"
-              placeholder="Provide clear criteria rationale (e.g. Unverified university affiliation, incomplete charter, duplicate society entry)..."
+              [(ngModel)]="rejectionReason"
+              placeholder="State the objective grounds for this rejection..."
+              class="form-textarea"
             ></textarea>
           </div>
         </div>
 
-        <footer class="modal-footer">
+        <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-outline"
+            class="btn btn-secondary"
             (click)="closeRejectModal()"
             [disabled]="isSubmittingAction()"
           >
@@ -320,9 +589,13 @@
             (click)="onConfirmReject()"
             [disabled]="!rejectionReason.trim() || isSubmittingAction()"
           >
-            Confirm Rejection &amp; Log
+            @if (isSubmittingAction()) {
+              <span>Logging Decision...</span>
+            } @else {
+              <span>Confirm Rejection</span>
+            }
           </button>
-        </footer>
+        </div>
       </div>
     </div>
   }

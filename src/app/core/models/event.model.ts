@@ -1,4 +1,4 @@
-export type EventStatus = 'pending' | 'approved' | 'flagged_conflict';
+export type EventStatus = 'pending' | 'approved' | 'flagged_conflict' | 'rejected';
 
 export type EventType = 'hackathon' | 'workshop' | 'conference' | 'seminar' | 'competition' | 'cultural' | 'meetup';
 
@@ -17,4 +17,7 @@ export interface ClubEvent {
   conflictWithEventId?: string | null;
   createdBy: string; // uid
   createdAt: string | number | any;
+  reviewedBy?: string;
+  reviewedAt?: string | number | any;
+  rejectionReason?: string;
 }

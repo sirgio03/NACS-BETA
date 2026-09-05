@@ -283,6 +283,8 @@ describe('Club Lead Functions Suite', () => {
       assert.strictEqual(result.clubId, 'club_alpha');
       assert.strictEqual(mockClubsDb.club_alpha.description, 'Updated innovative robotics student society bio.');
       assert.strictEqual(mockClubsDb.club_alpha.leadership.length, 2);
+      // Crucial invariant: 'clubId' is used solely as routing path and is never written as a field into the club document
+      assert.strictEqual(mockClubsDb.club_alpha.clubId, undefined);
     });
   });
 
