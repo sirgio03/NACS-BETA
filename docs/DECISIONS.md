@@ -207,4 +207,44 @@ Offset-based pagination (`offset(N)`) in Firestore reads and bills for all skipp
 - Client requests fetch `pageSize + 1` documents to determine if a subsequent page exists without needing an expensive `count()` aggregation.
 - All paginated queries are backed by composite indexes in `firestore.indexes.json`.
 
+---
+
+## ADR 016: Application Rejection Governance & Mandatory Server-Side Reason
+
+### Context
+Rejecting a university student club membership application without documented justification damages institutional transparency, leaves applicants without actionable feedback, and risks subjective or arbitrary decision-making. Allowing rejection logic to execute client-side or without strict caller role validation introduces privilege escalation risks.
+
+### Decision
+- Implement `rejectApplication` as a callable Cloud Function that strictly validates the caller's role (`board` or `admin`) via a fresh read of `users/{callerUid}` server-side.
+- Require a non-empty, non-whitespace `reason` parameter validated server-side, throwing an `invalid-argument` error if omitted.
+- Atomically update the application document with `status: 'rejected'`, `rejectionReason: reason`, `reviewedBy: callerUid`, and `reviewedAt: FieldValue.serverTimestamp()`.
+
+---
+
+## ADR 017: Decision Audit Trail via `applicationDecisionLog`
+
+### Context
+Institutional governance demands a durable, tamper-proof record of every membership decision (approvals and rejections). Relying solely on the mutable `applications` collection risks loss of auditability if an application is updated or removed.
+
+### Decision
+- Establish a dedicated `applicationDecisionLog/{logId}` collection.
+- Both `approveApplication` and `rejectApplication` Cloud Functions write an immutable audit document storing:
+  `{ applicationId, decidedBy, decision: 'approved' | 'rejected', reason, clubName, university, timestamp }`.
+- Restrict read access in `firestore.rules` strictly to board and admin officers (`isBoardOrAdmin()`).
+- Unconditionally deny all direct client write operations (`allow write: if false;`).
+
+---
+
+## ADR 018: Elimination of Sensitive Identifiers from Stored Club Leadership
+
+### Context
+Public visitors browse the federation club directory. Storing user UIDs, contact emails, or phone numbers in the `clubs/{clubId}.leadership` array exposes student personal information to public scraping and creates redundant state synchronization requirements between `users` and `clubs`.
+
+### Decision
+- Restrict the `clubs/{clubId}.leadership` array strictly to non-sensitive public display objects: `[{ name: string, role: string }]`.
+- Remove all `uid`, `email`, and `phone` attributes from the stored club leadership array.
+- Maintain the authoritative association between a club lead and their club exclusively in the user document (`users/{uid}.clubId`).
+- Permissions for club lead management actions are verified server-side using `users/{uid}.clubId` and `users/{uid}.role == 'club_lead'`.
+
+
 

@@ -124,5 +124,16 @@ service cloud.firestore {
       allow read: if isBoardOrAdmin();
       allow write: if false;
     }
+
+    // =========================================================================
+    // 7. APPLICATION DECISION AUDIT LOG (applicationDecisionLog)
+    // Governance audit trail recording all membership approvals and rejections.
+    // Confidential: Read restricted to board and admin accounts.
+    // Zero client writes: strictly written server-side by Cloud Functions.
+    // =========================================================================
+    match /applicationDecisionLog/{logId} {
+      allow read: if isBoardOrAdmin();
+      allow write: if false;
+    }
   }
 }

@@ -29,7 +29,12 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['board', 'admin'] },
-    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
+    loadComponent: () =>
+      import('./features/admin/application-review.component').then((m) => m.ApplicationReviewComponent),
+  },
+  {
+    path: 'admin/applications',
+    redirectTo: 'admin',
   },
   // Protected Route: Club Lead Workspace (UX convenience guard reflecting server-side rules)
   {

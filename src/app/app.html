@@ -27,6 +27,11 @@
         <a routerLink="/clubs" class="header-link" routerLinkActive="active">
           Directory
         </a>
+        @if (authService.isBoardOrAdmin()) {
+          <a routerLink="/admin" class="header-link" routerLinkActive="active">
+            Admin Portal
+          </a>
+        }
         @if (authService.isAuthenticated()) {
           <div class="user-session">
             <span class="user-name">

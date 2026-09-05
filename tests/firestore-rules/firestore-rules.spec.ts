@@ -421,4 +421,55 @@ describe('NACS Firestore Security Rules Test Suite', () => {
       );
     });
   });
+
+  // ===========================================================================
+  // 7. APPLICATION DECISION LOG COLLECTION (applicationDecisionLog)
+  // ===========================================================================
+  describe('applicationDecisionLog Collection', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await db.collection('applicationDecisionLog').doc('decision_1').set({
+          applicationId: 'app_secret',
+          decidedBy: 'admin_user_1',
+          decision: 'rejected',
+          reason: 'Insufficient student activity documentation.',
+          clubName: 'Robotics Oran',
+          university: 'USTO',
+          timestamp: new Date(),
+        });
+      });
+    });
+
+    it('allows board member to read application decision logs', async () => {
+      const boardDb = testEnv.authenticatedContext('board_user_1').firestore();
+      await assertSucceeds(boardDb.collection('applicationDecisionLog').doc('decision_1').get());
+    });
+
+    it('allows admin to read application decision logs', async () => {
+      const adminDb = testEnv.authenticatedContext('admin_user_1').firestore();
+      await assertSucceeds(adminDb.collection('applicationDecisionLog').doc('decision_1').get());
+    });
+
+    it('denies unauthenticated visitors from reading application decision logs', async () => {
+      const unauthedDb = testEnv.unauthenticatedContext().firestore();
+      await assertFails(unauthedDb.collection('applicationDecisionLog').doc('decision_1').get());
+    });
+
+    it('denies regular visitor user from reading application decision logs', async () => {
+      const visitorDb = testEnv.authenticatedContext('visitor_user_1').firestore();
+      await assertFails(visitorDb.collection('applicationDecisionLog').doc('decision_1').get());
+    });
+
+    it('strictly denies direct client writes to applicationDecisionLog', async () => {
+      const adminDb = testEnv.authenticatedContext('admin_user_1').firestore();
+      await assertFails(
+        adminDb.collection('applicationDecisionLog').doc('forged_decision').set({
+          applicationId: 'app_secret',
+          decision: 'approved',
+        })
+      );
+    });
+  });
 });
+

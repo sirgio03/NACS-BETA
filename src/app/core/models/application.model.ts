@@ -21,5 +21,6 @@ export interface ClubApplication {
   submittedData: ApplicationSubmissionData;
   reviewedBy?: string; // uid of board/admin
   reviewedAt?: string | number | any;
+  rejectionReason?: string;
   createdAt?: string | number | any;
 }
