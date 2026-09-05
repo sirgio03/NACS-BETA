@@ -4,7 +4,7 @@
     "lint": "echo \"Functions lint skipped for scaffold\"",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "ts-node tests/callable-auth.spec.ts",
+    "test": "node -r ts-node/register --test tests/callable-auth.spec.ts tests/callable-lead.spec.ts",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",

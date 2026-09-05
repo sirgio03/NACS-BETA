@@ -13,6 +13,8 @@ export interface ClubEvent {
   type: EventType;
   description: string;
   status: EventStatus;
+  conflictContext?: string | null;
+  conflictWithEventId?: string | null;
   createdBy: string; // uid
   createdAt: string | number | any;
 }

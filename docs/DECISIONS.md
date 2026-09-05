@@ -260,6 +260,46 @@ During society federation application submission, student leads upload official 
   - **Zero SVG Tolerance**: SVGs are strictly excluded to prevent stored XSS attacks.
   - **Size Limit**: Maximum 10MB per proof document.
 
+---
+
+## ADR 020: Server-Side Club Ownership Verification for Mutation Operations
+
+### Context
+Allowing a client to supply an arbitrary `clubId` in mutation requests (`updateClubProfile`, `submitEvent`, `submitProject`) without server-side verification enables horizontal privilege escalation, where a club lead of Society A could overwrite Society B's profile or publish events on their behalf.
+
+### Decision
+- All club lead callable functions invoke `verifyClubLead(auth, expectedClubId)` before executing any business logic.
+- The helper performs a fresh read of `users/{auth.uid}` from Firestore to confirm:
+  1. `role === 'club_lead'`
+  2. `clubId` is non-empty
+  3. `users/{auth.uid}.clubId === expectedClubId`
+- Any mismatch immediately throws `permission-denied`, unconditionally rejecting cross-club mutations.
+
+---
+
+## ADR 021: Explicit Allowlist for Club Profile Edits & Leadership Privacy
+
+### Context
+Using a blocklist approach for club profile updates risks exposing critical organizational attributes (`name`, `university`, `category`, `foundingDate`, `verified`) to unauthorized changes by club leads. Furthermore, student executive rosters could inadvertently leak student emails or user IDs.
+
+### Decision
+- Enforce an explicit key allowlist in `updateClubProfile`: `['clubId', 'description', 'logoUrl', 'socials', 'leadership']`.
+- Any submission containing unapproved keys is rejected with an `invalid-argument` error.
+- The `leadership` array strictly enforces `{ name: string, role: string }` pairs only. Injected `uid` or `email` keys are detected and rejected at the Cloud Function boundary.
+
+---
+
+## ADR 022: Automated 3-Day Event Conflict Detection & Queue-For-Moderation Policy
+
+### Context
+Simultaneous or closely scheduled events across Algerian student societies cause date cannibalization and low attendance. However, automatically rejecting conflicting event submissions frustrates club leads who may have fixed university bookings.
+
+### Decision
+- In `submitEvent`, run an automated conflict query against approved events within a $\pm 3$-day window of the submitted start date.
+- If an approved event exists within the window, set `status: 'flagged_conflict'` (instead of `'pending'`) and store a descriptive `conflictContext` identifying the conflicting event's title and scheduled date.
+- The event is queued for board attention and remains unlisted publicly until explicitly approved by the board, while the club lead sees clear explanatory feedback on their dashboard.
+
+
 
 
 

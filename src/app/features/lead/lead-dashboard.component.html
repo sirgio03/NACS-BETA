@@ -1,0 +1,609 @@
+<div class="lead-dashboard">
+  <!-- Top Workspace Header -->
+  <header class="workspace-header">
+    <div class="header-inner">
+      <div class="header-content">
+        <div class="breadcrumbs">
+          <a routerLink="/clubs">Clubs Directory</a>
+          <span class="sep">/</span>
+          <span class="current">Lead Workspace</span>
+        </div>
+        
+        <div class="title-row" *ngIf="myClub() as club; else loadingHeader">
+          <div class="club-avatar" *ngIf="club.logoUrl; else initialAvatar">
+            <img [src]="club.logoUrl" [alt]="club.name" (error)="club.logoUrl = ''" />
+          </div>
+          <ng-template #initialAvatar>
+            <div class="club-initial">{{ club.name.charAt(0) }}</div>
+          </ng-template>
+
+          <div class="title-details">
+            <div class="title-meta">
+              <span class="badge category-badge">{{ club.category | titlecase }}</span>
+              <span class="badge verified-badge" *ngIf="club.verified">Verified Society</span>
+            </div>
+            <h1 class="society-name">{{ club.name }}</h1>
+            <p class="university-name">{{ club.university }} &bull; Affiliated Chapter</p>
+          </div>
+        </div>
+
+        <ng-template #loadingHeader>
+          <div class="header-skeleton">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-pill"></div>
+              <div class="skeleton-title"></div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="dashboard-tabs">
+      <div class="tabs-inner">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'profile'"
+          (click)="setTab('profile')"
+        >
+          Club Profile
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'events'"
+          (click)="setTab('events')"
+        >
+          My Events
+          <span class="tab-count" *ngIf="myEvents().length > 0">{{ myEvents().length }}</span>
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'projects'"
+          (click)="setTab('projects')"
+        >
+          My Projects
+          <span class="tab-count" *ngIf="myProjects().length > 0">{{ myProjects().length }}</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Notification Banner -->
+  <div class="feedback-banner" *ngIf="feedback()" [class]="feedback()?.type">
+    <p>{{ feedback()?.message }}</p>
+    <button type="button" class="close-btn" (click)="feedback.set(null)">✕</button>
+  </div>
+
+  <main class="dashboard-body">
+    <!-- ===================================================================== -->
+    <!-- TAB 1: CLUB PROFILE EDITOR -->
+    <!-- ===================================================================== -->
+    <section class="tab-pane" *ngIf="activeTab === 'profile'">
+      <!-- Loading Skeleton -->
+      <div class="pane-skeleton" *ngIf="isLoading()">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <div class="profile-container" *ngIf="!isLoading() && myClub() as club">
+        <!-- Protected Fields Card -->
+        <div class="card locked-fields-card">
+          <div class="card-header">
+            <h3>Institutional Identity</h3>
+            <span class="locked-badge">
+              <span class="lock-icon">🔒</span> Managed by NACS Board
+            </span>
+          </div>
+          <p class="card-desc">
+            To preserve institutional trust across university administrations, foundational identity attributes are approved during affiliation and cannot be altered by club leads.
+          </p>
+
+          <div class="locked-grid">
+            <div class="locked-item">
+              <label>Official Society Name</label>
+              <div class="locked-value">{{ club.name }}</div>
+            </div>
+            <div class="locked-item">
+              <label>University Affiliation</label>
+              <div class="locked-value">{{ club.university }}</div>
+            </div>
+            <div class="locked-item">
+              <label>Federation Category</label>
+              <div class="locked-value">{{ club.category | titlecase }}</div>
+            </div>
+            <div class="locked-item">
+              <label>Founding Date</label>
+              <div class="locked-value">{{ club.foundingDate || 'N/A' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editable Fields Form -->
+        <form class="card editable-card" (ngSubmit)="onSaveProfile()">
+          <div class="card-header">
+            <h3>Public Profile Details</h3>
+            <span class="editable-badge">Editable</span>
+          </div>
+
+          <div class="form-group">
+            <label for="desc">Society Mission & Description</label>
+            <textarea
+              id="desc"
+              rows="4"
+              class="form-control"
+              placeholder="Describe your society's focus, activities, and goals..."
+              [(ngModel)]="description"
+              name="description"
+            ></textarea>
+            <small class="field-hint">Visible on the public club directory and search listings.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="logo">Emblem / Logo URL</label>
+            <div class="logo-input-row">
+              <input
+                id="logo"
+                type="url"
+                class="form-control"
+                placeholder="https://example.com/logo.png"
+                [(ngModel)]="logoUrl"
+                name="logoUrl"
+              />
+              <div class="logo-preview" *ngIf="logoUrl">
+                <img [src]="logoUrl" alt="Logo preview" (error)="logoUrl = ''" />
+              </div>
+            </div>
+            <small class="field-hint">PNG, WebP, or JPEG URL (SVGs strictly prohibited).</small>
+          </div>
+
+          <!-- Social Links -->
+          <div class="form-group">
+            <label>Online Presences & Channels</label>
+            <div class="socials-grid">
+              <div class="social-input">
+                <span class="social-prefix">Website</span>
+                <input
+                  type="url"
+                  class="form-control"
+                  placeholder="https://myclub.dz"
+                  [(ngModel)]="socials['website']"
+                  name="social_website"
+                />
+              </div>
+              <div class="social-input">
+                <span class="social-prefix">GitHub</span>
+                <input
+                  type="url"
+                  class="form-control"
+                  placeholder="https://github.com/org"
+                  [(ngModel)]="socials['github']"
+                  name="social_github"
+                />
+              </div>
+              <div class="social-input">
+                <span class="social-prefix">LinkedIn</span>
+                <input
+                  type="url"
+                  class="form-control"
+                  placeholder="https://linkedin.com/company/club"
+                  [(ngModel)]="socials['linkedin']"
+                  name="social_linkedin"
+                />
+              </div>
+              <div class="social-input">
+                <span class="social-prefix">Instagram</span>
+                <input
+                  type="url"
+                  class="form-control"
+                  placeholder="https://instagram.com/club"
+                  [(ngModel)]="socials['instagram']"
+                  name="social_instagram"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Executive Leadership Roster -->
+          <div class="form-group">
+            <div class="leadership-header">
+              <div>
+                <label>Executive Leadership Roster</label>
+                <small class="field-hint">Names and roles only. User IDs and contact emails are strictly excluded for member privacy.</small>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="addLeaderMember()">
+                + Add Member
+              </button>
+            </div>
+
+            <div class="leadership-builder">
+              <div class="leader-row" *ngFor="let leader of leadershipList; let i = index">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Full Name (e.g. Amine Benali)"
+                  [(ngModel)]="leader.name"
+                  [name]="'leader_name_' + i"
+                  required
+                />
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Role (e.g. President, Tech Lead)"
+                  [(ngModel)]="leader.role"
+                  [name]="'leader_role_' + i"
+                  required
+                />
+                <button
+                  type="button"
+                  class="btn-icon delete-btn"
+                  title="Remove"
+                  (click)="removeLeaderMember(i)"
+                >
+                  ✕
+                </button>
+              </div>
+              <p class="empty-hint" *ngIf="leadershipList.length === 0">
+                No leadership members listed. Click "+ Add Member" to showcase your executive team.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="isSaving()"
+            >
+              <span *ngIf="isSaving()">Saving Changes...</span>
+              <span *ngIf="!isSaving()">Save Club Profile</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: MY EVENTS -->
+    <!-- ===================================================================== -->
+    <section class="tab-pane" *ngIf="activeTab === 'events'">
+      <div class="pane-header">
+        <div>
+          <h2>National Calendar Submissions</h2>
+          <p class="subtitle">Events submitted by your society for inclusion in the national university calendar.</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="openEventModal()">
+          + Submit New Event
+        </button>
+      </div>
+
+      <!-- Loading Skeleton -->
+      <div class="pane-skeleton" *ngIf="isLoading()">
+        <div class="skeleton-card" *ngFor="let n of [1, 2]"></div>
+      </div>
+
+      <!-- Event Grid -->
+      <div class="events-grid" *ngIf="!isLoading() && myEvents().length > 0">
+        <article class="event-card" *ngFor="let event of myEvents()">
+          <div class="event-card-header">
+            <span class="badge type-badge">{{ event.type | titlecase }}</span>
+            
+            <!-- Status Badge -->
+            <span class="badge status-badge status-pending" *ngIf="event.status === 'pending'">
+              Under Board Review
+            </span>
+            <span class="badge status-badge status-conflict" *ngIf="event.status === 'flagged_conflict'">
+              Conflict Flagged
+            </span>
+            <span class="badge status-badge status-approved" *ngIf="event.status === 'approved'">
+              Approved & Published
+            </span>
+          </div>
+
+          <h3 class="event-title">{{ event.title }}</h3>
+          
+          <div class="event-meta">
+            <span class="meta-item">📅 {{ event.date | date: 'mediumDate' }}</span>
+            <span class="meta-item">📍 {{ event.location }}</span>
+          </div>
+
+          <p class="event-desc">{{ event.description }}</p>
+
+          <!-- Conflict Explanation Box -->
+          <div class="conflict-alert" *ngIf="event.status === 'flagged_conflict' && event.conflictContext">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-text">
+              <strong>Calendar Schedule Conflict</strong>
+              <p>{{ event.conflictContext }}</p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Positive Empty State -->
+      <div class="empty-state" *ngIf="!isLoading() && myEvents().length === 0">
+        <div class="empty-icon">📅</div>
+        <h3>No Events Submitted Yet</h3>
+        <p>Submit workshops, hackathons, or competitions to feature on the national university events calendar.</p>
+        <button type="button" class="btn btn-primary" (click)="openEventModal()">
+          Submit First Event
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: MY PROJECTS -->
+    <!-- ===================================================================== -->
+    <section class="tab-pane" *ngIf="activeTab === 'projects'">
+      <div class="pane-header">
+        <div>
+          <h2>Student Project Showcase</h2>
+          <p class="subtitle">Highlight student engineering, scientific, and cultural creations from your university.</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="openProjectModal()">
+          + Submit Student Project
+        </button>
+      </div>
+
+      <!-- Loading Skeleton -->
+      <div class="pane-skeleton" *ngIf="isLoading()">
+        <div class="skeleton-card" *ngFor="let n of [1, 2]"></div>
+      </div>
+
+      <!-- Project Grid -->
+      <div class="projects-grid" *ngIf="!isLoading() && myProjects().length > 0">
+        <article class="project-card" *ngFor="let proj of myProjects()">
+          <div class="project-card-header">
+            <span class="badge status-badge status-pending" *ngIf="proj.status === 'pending'">
+              Under Review
+            </span>
+            <span class="badge status-badge status-approved" *ngIf="proj.status === 'approved'">
+              Showcased
+            </span>
+          </div>
+
+          <h3 class="project-title">{{ proj.title }}</h3>
+          
+          <div class="project-team">
+            <strong>Team:</strong> {{ proj.team.join(', ') }}
+          </div>
+
+          <p class="project-desc">{{ proj.description }}</p>
+
+          <div class="project-tags" *ngIf="proj.tags && proj.tags.length > 0">
+            <span class="tag-pill" *ngFor="let tag of proj.tags">#{{ tag }}</span>
+          </div>
+
+          <div class="project-links" *ngIf="proj.links">
+            <a *ngIf="proj.links.github" [href]="proj.links.github" target="_blank" rel="noopener" class="link-btn">
+              GitHub
+            </a>
+            <a *ngIf="proj.links.demo" [href]="proj.links.demo" target="_blank" rel="noopener" class="link-btn">
+              Live Demo
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <!-- Positive Empty State -->
+      <div class="empty-state" *ngIf="!isLoading() && myProjects().length === 0">
+        <div class="empty-icon">💡</div>
+        <h3>No Projects Showcased Yet</h3>
+        <p>Submit your members' standout tech, robotics, or research creations to appear in the national showcase gallery.</p>
+        <button type="button" class="btn btn-primary" (click)="openProjectModal()">
+          Submit First Project
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- EVENT SUBMISSION MODAL -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" *ngIf="showEventModal()">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Submit Event to National Calendar</h3>
+        <button type="button" class="close-modal-btn" (click)="closeEventModal()">✕</button>
+      </div>
+
+      <form (ngSubmit)="onSubmitEvent()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="eventTitle">Event Title *</label>
+            <input
+              id="eventTitle"
+              type="text"
+              class="form-control"
+              placeholder="e.g. Algeria AI Hackathon 2026"
+              [(ngModel)]="eventForm.title"
+              name="eventTitle"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="eventDate">Start Date & Time *</label>
+              <input
+                id="eventDate"
+                type="datetime-local"
+                class="form-control"
+                [(ngModel)]="eventForm.date"
+                name="eventDate"
+                required
+              />
+            </div>
+            <div class="form-group col">
+              <label for="eventEndDate">End Date & Time *</label>
+              <input
+                id="eventEndDate"
+                type="datetime-local"
+                class="form-control"
+                [(ngModel)]="eventForm.endDate"
+                name="eventEndDate"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="eventLocation">Location *</label>
+              <input
+                id="eventLocation"
+                type="text"
+                class="form-control"
+                placeholder="e.g. Auditorium ESI, Algiers"
+                [(ngModel)]="eventForm.location"
+                name="eventLocation"
+                required
+              />
+            </div>
+            <div class="form-group col">
+              <label for="eventType">Event Type *</label>
+              <select
+                id="eventType"
+                class="form-control"
+                [(ngModel)]="eventForm.type"
+                name="eventType"
+                required
+              >
+                <option value="workshop">Workshop</option>
+                <option value="hackathon">Hackathon</option>
+                <option value="conference">Conference</option>
+                <option value="seminar">Seminar</option>
+                <option value="competition">Competition</option>
+                <option value="cultural">Cultural</option>
+                <option value="meetup">Meetup</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="eventDesc">Description & Agenda *</label>
+            <textarea
+              id="eventDesc"
+              rows="4"
+              class="form-control"
+              placeholder="Outline event topics, eligibility, schedule..."
+              [(ngModel)]="eventForm.description"
+              name="eventDesc"
+              required
+            ></textarea>
+            <small class="field-hint">Submitted events are cross-checked for conflicts (+/- 3 days) against existing approved events before board review.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEventModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+            {{ isSaving() ? 'Submitting...' : 'Submit for Board Review' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- PROJECT SUBMISSION MODAL -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" *ngIf="showProjectModal()">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Submit Student Showcase Project</h3>
+        <button type="button" class="close-modal-btn" (click)="closeProjectModal()">✕</button>
+      </div>
+
+      <form (ngSubmit)="onSubmitProject()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="projTitle">Project Title *</label>
+            <input
+              id="projTitle"
+              type="text"
+              class="form-control"
+              placeholder="e.g. Autonomous Mars Rover Prototype"
+              [(ngModel)]="projectForm.title"
+              name="projTitle"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="projTeam">Student Team Members *</label>
+            <input
+              id="projTeam"
+              type="text"
+              class="form-control"
+              placeholder="Comma-separated names (e.g. Amine Benali, Sarah K., Karim T.)"
+              [(ngModel)]="projectForm.teamRaw"
+              name="projTeam"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="projDesc">Description *</label>
+            <textarea
+              id="projDesc"
+              rows="4"
+              class="form-control"
+              placeholder="Detail technical problem, architecture, technologies used..."
+              [(ngModel)]="projectForm.description"
+              name="projDesc"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="projTags">Tags / Technologies</label>
+            <input
+              id="projTags"
+              type="text"
+              class="form-control"
+              placeholder="Comma-separated tags (e.g. robotics, ai, iot, python)"
+              [(ngModel)]="projectForm.tagsRaw"
+              name="projTags"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="projGithub">GitHub Repository</label>
+              <input
+                id="projGithub"
+                type="url"
+                class="form-control"
+                placeholder="https://github.com/org/repo"
+                [(ngModel)]="projectForm.github"
+                name="projGithub"
+              />
+            </div>
+            <div class="form-group col">
+              <label for="projDemo">Live Demo / Paper</label>
+              <input
+                id="projDemo"
+                type="url"
+                class="form-control"
+                placeholder="https://demo.example.com"
+                [(ngModel)]="projectForm.demo"
+                name="projDemo"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeProjectModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+            {{ isSaving() ? 'Submitting...' : 'Submit for Showcase' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

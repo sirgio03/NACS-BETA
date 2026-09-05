@@ -10,6 +10,8 @@ export interface ClubSocials {
   linkedin?: string;
   github?: string;
   twitter?: string;
+  discord?: string;
+  [key: string]: string | undefined;
 }
 
 export interface Club {

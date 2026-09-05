@@ -40,8 +40,13 @@ export const routes: Routes = [
   {
     path: 'lead',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['club_lead', 'board', 'admin'] },
-    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
+    data: { roles: ['club_lead'] },
+    loadComponent: () =>
+      import('./features/lead/lead-dashboard.component').then((m) => m.LeadDashboardComponent),
+  },
+  {
+    path: 'lead/dashboard',
+    redirectTo: 'lead',
   },
   {
     path: '**',
