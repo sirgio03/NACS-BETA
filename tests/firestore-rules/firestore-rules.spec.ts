@@ -143,17 +143,37 @@ describe('NACS Firestore Security Rules Test Suite', () => {
           status: 'pending',
           createdBy: 'lead_user_1',
         });
+        await db.collection('events').doc('event_flagged').set({
+          title: 'Conflicting Hackathon',
+          status: 'flagged_conflict',
+          createdBy: 'lead_user_1',
+        });
+        await db.collection('events').doc('event_rejected').set({
+          title: 'Rejected Meetup',
+          status: 'rejected',
+          createdBy: 'lead_user_1',
+        });
       });
     });
 
-    it('allows public visitor to read approved event', async () => {
+    it('allows public visitor to read approved event (status == approved)', async () => {
       const unauthedDb = testEnv.unauthenticatedContext().firestore();
       await assertSucceeds(unauthedDb.collection('events').doc('event_approved').get());
     });
 
-    it('denies public visitor from reading pending event', async () => {
+    it('strictly denies unauthenticated visitor from reading pending event (status == pending)', async () => {
       const unauthedDb = testEnv.unauthenticatedContext().firestore();
       await assertFails(unauthedDb.collection('events').doc('event_pending').get());
+    });
+
+    it('strictly denies unauthenticated visitor from reading flagged conflict event (status == flagged_conflict)', async () => {
+      const unauthedDb = testEnv.unauthenticatedContext().firestore();
+      await assertFails(unauthedDb.collection('events').doc('event_flagged').get());
+    });
+
+    it('strictly denies unauthenticated visitor from reading rejected event (status == rejected)', async () => {
+      const unauthedDb = testEnv.unauthenticatedContext().firestore();
+      await assertFails(unauthedDb.collection('events').doc('event_rejected').get());
     });
 
     it('denies non-board visitor from reading pending event of other creators', async () => {
@@ -199,17 +219,27 @@ describe('NACS Firestore Security Rules Test Suite', () => {
           status: 'pending',
           submittedBy: 'lead_user_1',
         });
+        await db.collection('projects').doc('proj_rejected').set({
+          title: 'Rejected Project',
+          status: 'rejected',
+          submittedBy: 'lead_user_1',
+        });
       });
     });
 
-    it('allows public visitor to read approved project', async () => {
+    it('allows public visitor to read approved project (status == approved)', async () => {
       const unauthedDb = testEnv.unauthenticatedContext().firestore();
       await assertSucceeds(unauthedDb.collection('projects').doc('proj_approved').get());
     });
 
-    it('denies public visitor from reading pending project', async () => {
+    it('strictly denies unauthenticated visitor from reading pending project (status == pending)', async () => {
       const unauthedDb = testEnv.unauthenticatedContext().firestore();
       await assertFails(unauthedDb.collection('projects').doc('proj_pending').get());
+    });
+
+    it('strictly denies unauthenticated visitor from reading rejected project (status == rejected)', async () => {
+      const unauthedDb = testEnv.unauthenticatedContext().firestore();
+      await assertFails(unauthedDb.collection('projects').doc('proj_rejected').get());
     });
 
     it('allows submitter to inspect their own pending project', async () => {

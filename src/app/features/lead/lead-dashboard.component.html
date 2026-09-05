@@ -452,17 +452,32 @@
 
           <div class="form-row">
             <div class="form-group col">
-              <label for="eventLocation">Location *</label>
+              <label for="eventWilaya">Wilaya (Host Province) *</label>
+              <select
+                id="eventWilaya"
+                class="form-control"
+                [(ngModel)]="eventForm.wilaya"
+                name="eventWilaya"
+                required
+              >
+                <option *ngFor="let w of algerianWilayas" [value]="w">{{ w }}</option>
+              </select>
+            </div>
+            <div class="form-group col">
+              <label for="eventLocation">Venue / Location *</label>
               <input
                 id="eventLocation"
                 type="text"
                 class="form-control"
-                placeholder="e.g. Auditorium ESI, Algiers"
+                placeholder="e.g. Auditorium ESI, Cyber Espace USTHB"
                 [(ngModel)]="eventForm.location"
                 name="eventLocation"
                 required
               />
             </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group col">
               <label for="eventType">Event Type *</label>
               <select

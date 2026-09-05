@@ -98,12 +98,41 @@ export const updateClubProfile = onCall<UpdateClubProfilePayload>(async (request
   };
 });
 
+export const ALGERIAN_WILAYAS_LIST = [
+  '01 - Adrar', '02 - Chlef', '03 - Laghouat', '04 - Oum El Bouaghi', '05 - Batna',
+  '06 - Béjaïa', '07 - Biskra', '08 - Béchar', '09 - Blida', '10 - Bouira',
+  '11 - Tamanrasset', '12 - Tébessa', '13 - Tlemcen', '14 - Tiaret', '15 - Tizi Ouzou',
+  '16 - Alger', '17 - Djelfa', '18 - Jijel', '19 - Sétif', '20 - Saïda',
+  '21 - Skikda', '22 - Sidi Bel Abbès', '23 - Annaba', '24 - Guelma', '25 - Constantine',
+  '26 - Médéa', '27 - Mostaganem', '28 - M\'Sila', '29 - Mascara', '30 - Ouargla',
+  '31 - Oran', '32 - El Bayadh', '33 - Illizi', '34 - Bordj Bou Arréridj', '35 - Boumerdès',
+  '36 - El Tarf', '37 - Tindouf', '38 - Tissemsilt', '39 - El Oued', '40 - Khenchela',
+  '41 - Souk Ahras', '42 - Tipaza', '43 - Mila', '44 - Aïn Defla', '45 - Naâma',
+  '46 - Aïn Témouchent', '47 - Ghardaïa', '48 - Relizane', '49 - Timimoun',
+  '50 - Bordj Badji Mokhtar', '51 - Ouled Djellal', '52 - Béni Abbès', '53 - In Salah',
+  '54 - In Guezzam', '55 - Touggourt', '56 - Djanet', '57 - El M\'Ghair', '58 - El Meniaa',
+];
+
+export function normalizeWilaya(input: string): string | null {
+  if (!input || typeof input !== 'string') return null;
+  const trimmed = input.trim();
+  const match = ALGERIAN_WILAYAS_LIST.find((w) => {
+    if (w.toLowerCase() === trimmed.toLowerCase()) return true;
+    const parts = w.split(' - ');
+    const code = parts[0];
+    const name = parts[1];
+    return code === trimmed || name.toLowerCase() === trimmed.toLowerCase();
+  });
+  return match || null;
+}
+
 export interface SubmitEventPayload {
   clubId: string;
   title: string;
   date: string;
   endDate: string;
   location: string;
+  wilaya: string;
   type: 'hackathon' | 'workshop' | 'conference' | 'seminar' | 'competition' | 'cultural' | 'meetup';
   description: string;
 }
@@ -139,6 +168,10 @@ export const submitEvent = onCall<SubmitEventPayload>(async (request) => {
   }
   if (!data.location || typeof data.location !== 'string' || !data.location.trim()) {
     throw new HttpsError('invalid-argument', 'Event location is required.');
+  }
+  const normalizedWilaya = normalizeWilaya(data.wilaya);
+  if (!normalizedWilaya) {
+    throw new HttpsError('invalid-argument', 'A valid Algerian wilaya (1 to 58) is required.');
   }
   if (!data.description || typeof data.description !== 'string' || !data.description.trim()) {
     throw new HttpsError('invalid-argument', 'Event description is required.');
@@ -184,6 +217,7 @@ export const submitEvent = onCall<SubmitEventPayload>(async (request) => {
     date: data.date,
     endDate: data.endDate,
     location: data.location.trim(),
+    wilaya: normalizedWilaya,
     type: data.type || 'meetup',
     description: data.description.trim(),
     status,

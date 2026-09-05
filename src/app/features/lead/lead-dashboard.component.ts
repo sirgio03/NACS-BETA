@@ -9,7 +9,7 @@ import {
   SubmitProjectRequest,
 } from '../../core/services/club-lead.service';
 import { Club, ClubLeader } from '../../core/models/club.model';
-import { ClubEvent, EventType } from '../../core/models/event.model';
+import { ClubEvent, EventType, ALGERIAN_WILAYAS } from '../../core/models/event.model';
 import { StudentProject } from '../../core/models/project.model';
 
 @Component({
@@ -22,6 +22,8 @@ import { StudentProject } from '../../core/models/project.model';
 export class LeadDashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly clubLeadService = inject(ClubLeadService);
+
+  readonly algerianWilayas = ALGERIAN_WILAYAS;
 
   // --- Active Tab ---
   activeTab: 'profile' | 'events' | 'projects' = 'profile';
@@ -53,6 +55,7 @@ export class LeadDashboardComponent implements OnInit {
     date: '',
     endDate: '',
     location: '',
+    wilaya: '16 - Alger',
     type: 'workshop' as EventType,
     description: '',
   };
@@ -193,6 +196,7 @@ export class LeadDashboardComponent implements OnInit {
       date: '',
       endDate: '',
       location: '',
+      wilaya: '16 - Alger',
       type: 'workshop',
       description: '',
     };
@@ -225,6 +229,7 @@ export class LeadDashboardComponent implements OnInit {
         date: new Date(this.eventForm.date).toISOString(),
         endDate: new Date(this.eventForm.endDate).toISOString(),
         location: this.eventForm.location.trim() || 'Online / Campus',
+        wilaya: this.eventForm.wilaya,
         type: this.eventForm.type,
         description: this.eventForm.description.trim(),
       };

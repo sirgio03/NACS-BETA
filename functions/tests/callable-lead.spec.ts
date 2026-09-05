@@ -302,6 +302,7 @@ describe('Club Lead Functions Suite', () => {
               date: '2026-11-01T09:00:00.000Z',
               endDate: '2026-11-01T18:00:00.000Z',
               location: 'USTHB Campus',
+              wilaya: '16 - Alger',
               type: 'hackathon',
               description: 'Annual competitive programming hackathon.',
             },
@@ -310,6 +311,31 @@ describe('Club Lead Functions Suite', () => {
         },
         (err: any) => {
           assert.strictEqual(err.code, 'permission-denied');
+          return true;
+        }
+      );
+    });
+
+    it('rejects event submission if wilaya is missing or invalid (invalid-argument)', async () => {
+      await assert.rejects(
+        async () => {
+          await submitEvent.run({
+            data: {
+              clubId: 'club_alpha',
+              title: 'Wilaya-less Event',
+              date: '2026-11-01T09:00:00.000Z',
+              endDate: '2026-11-01T18:00:00.000Z',
+              location: 'Somewhere',
+              wilaya: '99 - Mars', // Invalid wilaya
+              type: 'meetup',
+              description: 'Event with non-existent wilaya.',
+            },
+            auth: { uid: 'lead_user_alpha', token: {} } as any,
+          } as any);
+        },
+        (err: any) => {
+          assert.strictEqual(err.code, 'invalid-argument');
+          assert.match(err.message, /A valid Algerian wilaya \(1 to 58\) is required/);
           return true;
         }
       );
@@ -325,6 +351,7 @@ describe('Club Lead Functions Suite', () => {
           date: '2026-10-16T09:00:00.000Z',
           endDate: '2026-10-16T17:00:00.000Z',
           location: 'Lab 4, USTHB',
+          wilaya: '16 - Alger',
           type: 'workshop',
           description: 'Hands-on embedded systems workshop.',
         },
@@ -338,7 +365,7 @@ describe('Club Lead Functions Suite', () => {
       assert.match(result.conflictContext, /National Robotics Summit/);
     });
 
-    it('sets status to pending when NO approved events exist within +/- 3 days', async () => {
+    it('sets status to pending when NO approved events exist within +/- 3 days and stores structured wilaya', async () => {
       // Submitted date 2026-11-25 is far away from 2026-10-15
       const result = await submitEvent.run({
         data: {
@@ -347,6 +374,7 @@ describe('Club Lead Functions Suite', () => {
           date: '2026-11-25T10:00:00.000Z',
           endDate: '2026-11-25T16:00:00.000Z',
           location: 'Auditorium USTO',
+          wilaya: '31 - Oran',
           type: 'conference',
           description: 'Showcase of autonomous aerial navigation systems.',
         },
@@ -356,6 +384,10 @@ describe('Club Lead Functions Suite', () => {
       assert.strictEqual(result.success, true);
       assert.strictEqual(result.status, 'pending');
       assert.strictEqual(result.conflictContext, null);
+
+      const created = mockEventsCreated.find((e) => e.title === 'Autonomous Drone Demo');
+      assert.ok(created, 'Created event must be in mock DB');
+      assert.strictEqual(created.wilaya, '31 - Oran');
     });
   });
 

@@ -28,6 +28,7 @@ export interface SubmitEventRequest {
   date: string;
   endDate: string;
   location: string;
+  wilaya: string;
   type: EventType;
   description: string;
 }

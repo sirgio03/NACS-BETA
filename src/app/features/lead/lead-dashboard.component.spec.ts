@@ -162,6 +162,7 @@ describe('LeadDashboardComponent', () => {
       date: '2026-11-10T10:00',
       endDate: '2026-11-10T18:00',
       location: 'Auditorium',
+      wilaya: '16 - Alger',
       type: 'conference',
       description: 'Annual developer conference.',
     };
