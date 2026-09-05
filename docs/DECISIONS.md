@@ -246,5 +246,20 @@ Public visitors browse the federation club directory. Storing user UIDs, contact
 - Maintain the authoritative association between a club lead and their club exclusively in the user document (`users/{uid}.clubId`).
 - Permissions for club lead management actions are verified server-side using `users/{uid}.clubId` and `users/{uid}.role == 'club_lead'`.
 
+---
+
+## ADR 019: Application Proof-Document Storage Security & Restricted Read Access
+
+### Context
+During society federation application submission, student leads upload official institutional documents (e.g. university affiliation letters, club charters, faculty approvals). These documents contain sensitive administrative contact details and institutional seals that must not be publicly readable.
+
+### Decision
+- Enforce confidential access in `storage.rules` for all paths under `/applications/{applicationId}/{fileName}`:
+  - **Read Access**: Strictly restricted to the authenticated applicant (matching `contactEmail` or `leadUid` on the application document, or matching `request.auth.uid == applicationId`) and board/admin officers (`isBoardOrAdmin()`).
+  - **Write Access**: Restricted to authenticated users uploading approved document formats (`application/pdf`, `image/jpeg`, `image/png`, `image/webp`).
+  - **Zero SVG Tolerance**: SVGs are strictly excluded to prevent stored XSS attacks.
+  - **Size Limit**: Maximum 10MB per proof document.
+
+
 
 

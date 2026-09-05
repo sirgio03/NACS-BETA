@@ -12,6 +12,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless",
     "test:rules": "ts-node tests/firestore-rules/firestore-rules.spec.ts",
+    "test:functions": "npm --prefix functions run test",
     "emulators:rules-test": "firebase emulators:exec --only firestore \"npm run test:rules\""
   },
   "prettier": {

@@ -27,6 +27,18 @@ service firebase.storage {
       return request.resource.size <= maxMb * 1024 * 1024;
     }
 
+    function userDocExists() {
+      return isAuthenticated() && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserRole() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isBoardOrAdmin() {
+      return userDocExists() && (getUserRole() == 'board' || getUserRole() == 'admin');
+    }
+
     // =========================================================================
     // CLUB ASSETS (Logos, badges)
     // Max 2MB, raster image only (JPEG, PNG, WebP).
@@ -49,6 +61,26 @@ service firebase.storage {
       allow write: if isAuthenticated() 
                    && isRasterImage() 
                    && isUnderSize(5);
+    }
+
+    // =========================================================================
+    // APPLICATION PROOF DOCUMENTS (Official university affiliation letters, charters)
+    // Confidential: Restricted strictly to applicant + board/admin accounts,
+    // matching the applications collection security rule.
+    // Allowed formats: PDF or raster image (JPEG, PNG, WebP). SVGs strictly excluded.
+    // Max 10MB per document.
+    // =========================================================================
+    match /applications/{applicationId}/{fileName} {
+      allow read: if isAuthenticated() && (
+        isBoardOrAdmin() ||
+        request.auth.uid == applicationId ||
+        (firestore.exists(/databases/(default)/documents/applications/$(applicationId)) &&
+         (firestore.get(/databases/(default)/documents/applications/$(applicationId)).data.contactEmail == request.auth.token.email ||
+          firestore.get(/databases/(default)/documents/applications/$(applicationId)).data.submittedData.leadUid == request.auth.uid))
+      );
+      allow write: if isAuthenticated()
+                   && request.resource.contentType.matches('(application/pdf|image/(jpeg|png|webp))')
+                   && isUnderSize(10);
     }
   }
 }
