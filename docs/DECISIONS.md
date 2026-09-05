@@ -326,3 +326,29 @@ Events flagged with `status == 'flagged_conflict'` by the automated 3-day proxim
 - The board interface displays the detailed `conflictContext` identifying the conflicting event and scheduled dates.
 - When approved, `approveEvent` transitions the event status directly to `'approved'` and records in `moderationDecisionLog` that the board consciously resolved the proximity conflict.
 - If the board determines the conflict is unmanageable, they execute `rejectEvent` with a mandatory explanation advising the club lead on viable alternative scheduling windows.
+
+---
+
+## ADR 025: Native Public Calendar Architecture & Date-Bounded Range Queries
+
+### Context
+The initial platform plan considered an embedded Google Calendar iframe for displaying national events. However, following the implementation of structured club lead submission (Feature 5) and board moderation governance (Feature 6), all events reside natively in Firestore with lifecycle statuses (`pending`, `flagged_conflict`, `approved`, `rejected`). Duplicating approved events into an external Google Calendar would create dual sources of truth and operational synchronization debt. Furthermore, querying the entire collection on every page visit would scale read costs linearly with historical archives.
+
+### Decision
+- **Native UI over Iframe**: Build the public calendar natively in Angular reading directly from Firestore's `events` collection via public read rules (`status == 'approved'`).
+- **Date-Bounded Range Queries**: Viewport queries are bounded strictly to the active viewing window (`date >= startIso && date <= endIso`) with a small padding buffer, backed by composite indexes (`status ASC, date ASC`, `status ASC, type ASC, date ASC`, `status ASC, wilaya ASC, date ASC`).
+- **View Responsiveness**: Implement three coordinated viewports: Month grid (default), Week columns, and Agenda/List view (optimized for mobile screens).
+- **Client-Side Filter Layering**: Filters for event category (7 types), Algerian wilaya (1 to 58), and search terms operate responsively across the fetched date window without requiring redundant server round-trips.
+
+---
+
+## ADR 026: Server-Side iCalendar (.ICS) Export & Conflict Privacy Quarantine
+
+### Context
+Attendees require the ability to export national events into calendar software (Google Calendar, Outlook, Apple Calendar). Generating `.ics` files client-side introduces timezone skew across different user device settings and risks formatting inconsistencies. Additionally, events approved despite a schedule proximity clash (`conflictContext != null`) require attendee awareness without leaking internal board moderation discussions, reviewer identities, or other clubs' unapproved submissions.
+
+### Decision
+- **Server-Side Generation**: Exporting iCalendar files is handled by Cloud Functions (`exportEventIcs` and `exportEventsIcs`), generating RFC 5545 compliant payloads with explicit `Africa/Algiers` (UTC+1, no DST) standard timezone components.
+- **Approved-Only Security Barrier**: The export functions strictly verify `status === 'approved'`. Any attempt to export unapproved, pending, or rejected events via manipulated `eventId` parameters is rejected with `failed-precondition`, preventing unauthorized data exfiltration.
+- **Conflict Privacy Quarantine**: Approved events marked with proximity flags display a discreet public warning badge (`⚠️ National Schedule Proximity`) with an attendee-facing tooltip (*"Overlaps with another national event"*). Under no circumstances are raw internal board deliberation notes or other clubs' submission metadata exposed.
+- **Public Data Invariant in ICS**: The exported `.ics` file includes only public attributes (`SUMMARY`, `DESCRIPTION`, `LOCATION`, `DTSTART`, `DTEND`, `URL`). Personal student lead UIDs, emails, and reviewer attributes are completely excluded.

@@ -22,6 +22,11 @@ export const routes: Routes = [
       import('./features/showcase/showcase-gallery.component').then((m) => m.ShowcaseGalleryComponent),
   },
   {
+    path: 'calendar',
+    loadComponent: () =>
+      import('./features/calendar/calendar-view.component').then((m) => m.CalendarViewComponent),
+  },
+  {
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
   },
