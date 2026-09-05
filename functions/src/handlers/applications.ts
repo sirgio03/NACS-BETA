@@ -76,7 +76,8 @@ export interface ApproveApplicationPayload {
 /**
  * Board / Admin endpoint to approve club applications.
  * Executes an ATOMIC Firestore transaction that reads the application state inside
- * the transaction to eliminate race conditions, creates the club record, and provisions the club lead role.
+ * the transaction to eliminate race conditions, creates the club record, provisions
+ * the club lead role, and writes an immutable audit record to roleChangeLog.
  */
 export const approveApplication = onCall<ApproveApplicationPayload>(
   async (request) => {
@@ -141,9 +142,12 @@ export const approveApplication = onCall<ApproveApplicationPayload>(
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      // 5. Atomic step C: Elevate club lead user profile if leadUid is provided
+      // 5. Atomic step C: Elevate club lead user profile and write governance audit log
       if (leadUid) {
         const userRef = db.collection('users').doc(leadUid);
+        const userSnapshot = await transaction.get(userRef);
+        const previousRole = userSnapshot.exists ? (userSnapshot.data()?.role || 'visitor') : 'visitor';
+
         transaction.set(
           userRef,
           {
@@ -154,6 +158,18 @@ export const approveApplication = onCall<ApproveApplicationPayload>(
           },
           { merge: true }
         );
+
+        // Governance accountability audit trail
+        const auditLogRef = db.collection('roleChangeLog').doc();
+        transaction.set(auditLogRef, {
+          affectedUid: leadUid,
+          previousRole,
+          newRole: 'club_lead',
+          changedBy: request.auth!.uid,
+          clubId: newClubRef.id,
+          reason: 'application_approval',
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
       }
 
       return {

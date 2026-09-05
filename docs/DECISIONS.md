@@ -164,3 +164,47 @@ Single-page application client-side route guards (e.g. `RoleGuard`, `AuthGuard`)
   2. Cloud Functions role validations (compute/mutation layer)
 - Guards merely *reflect* the permissions already enforced server-side.
 
+---
+
+## ADR 013: Verified-Only Public Club Read Constraint in Security Rules
+
+### Context
+Public visitors must not see unverified, pending, or rejected student societies. If this constraint were only applied in the client-side query, any direct Firestore SDK request or crafted query could leak confidential or unverified club records.
+
+### Decision
+- Restrict read access in `firestore.rules`:
+  ```javascript
+  match /clubs/{clubId} {
+    allow read: if resource.data.verified == true || isBoardOrAdmin();
+    allow write: if false;
+  }
+  ```
+- Public and non-board visitors cannot read any club document where `verified == false`.
+- The rule is behaviorally verified by emulator unit tests.
+
+---
+
+## ADR 014: Governance Audit Logging via `roleChangeLog`
+
+### Context
+Organizational governance and accountability require a tamper-proof audit log of every role assignment or transition (e.g. promoting a user to `club_lead`, `board`, or `admin`).
+
+### Decision
+- Establish a dedicated `roleChangeLog/{logId}` collection.
+- All role transitions in `approveApplication` and `assignUserRole` atomically write an audit record containing:
+  `{ affectedUid, previousRole, newRole, changedBy, clubId, reason, timestamp }`.
+- `roleChangeLog` is read-restricted to board and admin officers (`isBoardOrAdmin()`), and completely rejects direct client writes.
+
+---
+
+## ADR 015: Cursor-Based Pagination Strategy for Large-Scale Collections
+
+### Context
+Offset-based pagination (`offset(N)`) in Firestore reads and bills for all skipped documents, degrading performance and increasing costs as collection size grows.
+
+### Decision
+- Standardize on cursor-based pagination using Firestore `startAfter(lastDocumentSnapshot)`.
+- Client requests fetch `pageSize + 1` documents to determine if a subsequent page exists without needing an expensive `count()` aggregation.
+- All paginated queries are backed by composite indexes in `firestore.indexes.json`.
+
+

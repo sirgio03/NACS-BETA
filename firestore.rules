@@ -49,12 +49,13 @@ service cloud.firestore {
 
     // =========================================================================
     // 1. CLUBS COLLECTION
-    // Directory is publicly readable.
-    // All writes must go through Cloud Functions (Admin SDK) to ensure verification
-    // and leadership consistency.
+    // Public directory: unauthenticated and regular visitors can ONLY read
+    // verified clubs (verified == true). Unverified/pending clubs are strictly
+    // restricted to board/admin accounts.
+    // All writes must go through Cloud Functions (Admin SDK).
     // =========================================================================
     match /clubs/{clubId} {
-      allow read: if true;
+      allow read: if resource.data.verified == true || isBoardOrAdmin();
       allow write: if false;
     }
 
@@ -111,6 +112,17 @@ service cloud.firestore {
                        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
                          'displayName', 'photoURL', 'phoneNumber', 'bio', 'updatedAt'
                        ]);
+    }
+
+    // =========================================================================
+    // 6. ROLE CHANGE AUDIT LOG (roleChangeLog)
+    // Governance audit trail recording all role transitions.
+    // Confidential: Read restricted to board and admin accounts.
+    // Zero client writes: strictly written server-side by Cloud Functions.
+    // =========================================================================
+    match /roleChangeLog/{logId} {
+      allow read: if isBoardOrAdmin();
+      allow write: if false;
     }
   }
 }

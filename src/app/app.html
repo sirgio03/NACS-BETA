@@ -23,7 +23,10 @@
         </div>
       </a>
 
-      <nav class="header-nav" aria-label="User Session Navigation">
+      <nav class="header-nav" aria-label="Federation Navigation">
+        <a routerLink="/clubs" class="header-link" routerLinkActive="active">
+          Directory
+        </a>
         @if (authService.isAuthenticated()) {
           <div class="user-session">
             <span class="user-name">

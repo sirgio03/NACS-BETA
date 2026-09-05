@@ -74,17 +74,45 @@ describe('NACS Firestore Security Rules Test Suite', () => {
   // 1. CLUBS COLLECTION
   // ===========================================================================
   describe('Clubs Collection', () => {
-    it('allows public read on clubs directory', async () => {
+    beforeEach(async () => {
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await context.firestore().collection('clubs').doc('club_1').set({
+        const db = context.firestore();
+        await db.collection('clubs').doc('club_verified').set({
           name: 'Micro Club USTHB',
           university: 'USTHB',
           verified: true,
         });
+        await db.collection('clubs').doc('club_unverified').set({
+          name: 'Pending New Club',
+          university: 'ESI Algiers',
+          verified: false,
+        });
       });
+    });
 
+    it('allows public visitor to read verified club', async () => {
       const unauthedDb = testEnv.unauthenticatedContext().firestore();
-      await assertSucceeds(unauthedDb.collection('clubs').doc('club_1').get());
+      await assertSucceeds(unauthedDb.collection('clubs').doc('club_verified').get());
+    });
+
+    it('strictly DENIES unauthenticated visitor from reading unverified club (verified == false)', async () => {
+      const unauthedDb = testEnv.unauthenticatedContext().firestore();
+      await assertFails(unauthedDb.collection('clubs').doc('club_unverified').get());
+    });
+
+    it('strictly DENIES regular visitor user from reading unverified club', async () => {
+      const visitorDb = testEnv.authenticatedContext('visitor_user_1').firestore();
+      await assertFails(visitorDb.collection('clubs').doc('club_unverified').get());
+    });
+
+    it('allows board member to read unverified club for moderation', async () => {
+      const boardDb = testEnv.authenticatedContext('board_user_1').firestore();
+      await assertSucceeds(boardDb.collection('clubs').doc('club_unverified').get());
+    });
+
+    it('allows admin to read unverified club for moderation', async () => {
+      const adminDb = testEnv.authenticatedContext('admin_user_1').firestore();
+      await assertSucceeds(adminDb.collection('clubs').doc('club_unverified').get());
     });
 
     it('strictly denies client direct writes to clubs', async () => {
@@ -343,6 +371,54 @@ describe('NACS Firestore Security Rules Test Suite', () => {
       if (data?.role !== 'board') {
         throw new Error('Server-side role elevation failed.');
       }
+    });
+  });
+
+  // ===========================================================================
+  // 6. ROLE CHANGE LOG COLLECTION (roleChangeLog)
+  // ===========================================================================
+  describe('roleChangeLog Collection', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await db.collection('roleChangeLog').doc('log_1').set({
+          affectedUid: 'lead_user_1',
+          previousRole: 'visitor',
+          newRole: 'club_lead',
+          changedBy: 'admin_user_1',
+          timestamp: new Date(),
+        });
+      });
+    });
+
+    it('allows board member to read role change logs', async () => {
+      const boardDb = testEnv.authenticatedContext('board_user_1').firestore();
+      await assertSucceeds(boardDb.collection('roleChangeLog').doc('log_1').get());
+    });
+
+    it('allows admin to read role change logs', async () => {
+      const adminDb = testEnv.authenticatedContext('admin_user_1').firestore();
+      await assertSucceeds(adminDb.collection('roleChangeLog').doc('log_1').get());
+    });
+
+    it('denies unauthenticated visitors from reading role change logs', async () => {
+      const unauthedDb = testEnv.unauthenticatedContext().firestore();
+      await assertFails(unauthedDb.collection('roleChangeLog').doc('log_1').get());
+    });
+
+    it('denies regular visitor user from reading role change logs', async () => {
+      const visitorDb = testEnv.authenticatedContext('visitor_user_1').firestore();
+      await assertFails(visitorDb.collection('roleChangeLog').doc('log_1').get());
+    });
+
+    it('strictly denies direct client writes to roleChangeLog', async () => {
+      const adminDb = testEnv.authenticatedContext('admin_user_1').firestore();
+      await assertFails(
+        adminDb.collection('roleChangeLog').doc('forged_log').set({
+          affectedUid: 'admin_user_1',
+          newRole: 'admin',
+        })
+      );
     });
   });
 });

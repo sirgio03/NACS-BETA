@@ -5,32 +5,41 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+    pathMatch: 'full',
+    redirectTo: 'clubs',
+  },
+  {
+    path: 'clubs',
+    loadComponent: () => import('./features/clubs/club-list.component').then((m) => m.ClubListComponent),
+  },
+  {
+    path: 'clubs/:id',
+    loadComponent: () => import('./features/clubs/club-detail.component').then((m) => m.ClubDetailComponent),
   },
   {
     path: 'auth/login',
-    loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent),
+    loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'unauthorized',
-    loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent),
+    loadComponent: () => import('./features/unauthorized/unauthorized.component').then((m) => m.UnauthorizedComponent),
   },
   // Protected Route: Board / Admin Portal (UX convenience guard reflecting server-side rules)
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['board', 'admin'] },
-    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
   },
   // Protected Route: Club Lead Workspace (UX convenience guard reflecting server-side rules)
   {
     path: 'lead',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['club_lead', 'board', 'admin'] },
-    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'clubs',
   },
 ];
