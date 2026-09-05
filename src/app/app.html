@@ -8,7 +8,7 @@
 
   <header class="nacs-header" role="banner">
     <div class="header-container">
-      <div class="brand-group">
+      <a routerLink="/" class="brand-group" aria-label="NACS Homepage">
         <img
           src="assets/brand/nacs-mark-square.png"
           alt="NACS Sunburst Emblem"
@@ -21,10 +21,38 @@
           <span class="brand-name">National Association of Campus Societies</span>
           <span class="brand-subtext">الرابطة الوطنية للنوادي الجامعية</span>
         </div>
-      </div>
+      </a>
 
-      <nav class="header-nav" aria-label="Federation Navigation">
-        <span class="badge badge-accent">Federation Portal</span>
+      <nav class="header-nav" aria-label="User Session Navigation">
+        @if (authService.isAuthenticated()) {
+          <div class="user-session">
+            <span class="user-name">
+              {{ authService.userProfile()?.displayName || authService.currentUser()?.email }}
+            </span>
+            <span
+              class="badge"
+              [class.badge-approved]="authService.isAdmin() || authService.isBoard()"
+              [class.badge-pending]="authService.isClubLead()"
+              [class.badge-accent]="authService.userRole() === 'visitor'"
+            >
+              {{ authService.userRole() | uppercase }}
+            </span>
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              (click)="onSignOut()"
+              aria-label="Sign Out"
+            >
+              Sign Out
+            </button>
+          </div>
+        } @else {
+          <div class="auth-actions">
+            <a routerLink="/auth/login" class="btn btn-accent btn-sm">
+              Sign In
+            </a>
+          </div>
+        }
       </nav>
     </div>
   </header>

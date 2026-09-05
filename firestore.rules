@@ -98,16 +98,19 @@ service cloud.firestore {
     // 5. USERS COLLECTION
     // User profile data.
     // Read: authenticated owner or board/admin.
-    // Create / Delete: forbidden from client (provisioned via Cloud Functions).
-    // Update: authenticated owner can only modify non-sensitive profile fields
-    //         and CANNOT alter 'role' or 'clubId'.
+    // Create / Delete: forbidden from client (provisioned via Cloud Functions auth trigger).
+    // Update: authenticated owner can ONLY modify fields in the strict ALLOWLIST.
+    // Any new schema fields added in the future are DENIED by default.
+    // 'role' and 'clubId' are strictly forbidden from client updates.
     // =========================================================================
     match /users/{uid} {
       allow read: if isAuthenticated() && (request.auth.uid == uid || isBoardOrAdmin());
       allow create: if false;
       allow delete: if false;
       allow update: if isOwner(uid) && 
-                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'clubId']);
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                         'displayName', 'photoURL', 'phoneNumber', 'bio', 'updatedAt'
+                       ]);
     }
   }
 }

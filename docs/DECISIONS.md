@@ -116,3 +116,51 @@ Static syntax validation of `firestore.rules` cannot guarantee that security pol
 - Implement an automated security rules test suite in `tests/firestore-rules/` utilizing `@firebase/rules-unit-testing`.
 - Run tests against the local Firebase Firestore Emulator as a required step in the CI pipeline (`npm run test:rules` / `npx firebase emulators:exec`).
 - Tests cover unauthenticated, authenticated, creator, lead, and board/admin access patterns across all collections.
+
+---
+
+## ADR 010: Strict Allowlist Policy for `users/{uid}` Updates
+
+### Context
+Using a blocklist approach (e.g. denying edits to `role` and `clubId`) leaves user profiles vulnerable to unintended writes whenever new schema fields (e.g. `isSuperuser`, `reputation`, `internalNotes`) are introduced to the data model in the future.
+
+### Decision
+- Formulate the `users/{uid}` update rule as a strict **allowlist**:
+  ```javascript
+  let allowedFields = ['displayName', 'photoURL', 'phoneNumber', 'bio', 'updatedAt'];
+  allow update: if isOwner(uid) && 
+                   request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
+  ```
+- Any future schema fields are denied by default unless intentionally and explicitly added to `allowedFields`.
+- Direct client document creation and deletion are unconditionally denied (`allow create, delete: if false;`).
+
+---
+
+## ADR 011: Server-Side Default Profile Provisioning on First Sign-In
+
+### Context
+When a new user signs in via Google Sign-In or email registration for the first time, client-side profile creation creates an attack vector where a manipulated client SDK payload could inject an elevated role (`board`, `admin`, `club_lead`).
+
+### Decision
+- Trigger a server-side Cloud Function (`onUserCreated`) automatically upon Firebase Authentication user creation.
+- The function provisions `users/{uid}` with `role: 'visitor'` (baseline non-elevated role) and `clubId: null`.
+- The client NEVER creates the initial `users/{uid}` document.
+- Role elevation happens strictly server-side:
+  - `club_lead`: Assigned inside the atomic `approveApplication` transaction.
+  - `board` / `admin`: Assigned via the admin-only callable endpoint `assignUserRole`.
+
+---
+
+## ADR 012: Framing Route Guards as UX Convenience, Not Security Boundaries
+
+### Context
+Single-page application client-side route guards (e.g. `RoleGuard`, `AuthGuard`) can be bypassed by browser console manipulation or network tampering.
+
+### Decision
+- Formally define `RoleGuard` and `AuthGuard` as **client-side UX convenience tools only**.
+- Guards serve to improve navigation by avoiding dead-end states, but they are never treated as security boundaries.
+- The sole authoritative security boundaries remain:
+  1. Firestore Security Rules (data layer)
+  2. Cloud Functions role validations (compute/mutation layer)
+- Guards merely *reflect* the permissions already enforced server-side.
+

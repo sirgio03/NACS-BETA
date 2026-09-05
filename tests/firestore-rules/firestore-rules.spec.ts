@@ -1,5 +1,4 @@
 import { describe, it, before, after, beforeEach } from 'node:test';
-import assert from 'node:assert';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
@@ -44,22 +43,28 @@ describe('NACS Firestore Security Rules Test Suite', () => {
         await db.collection('users').doc('admin_user_1').set({
           role: 'admin',
           email: 'admin@nacs.dz',
+          displayName: 'Admin Lead',
         });
         // Board user
         await db.collection('users').doc('board_user_1').set({
           role: 'board',
           email: 'board@nacs.dz',
+          displayName: 'Board Officer',
         });
         // Regular club lead user
         await db.collection('users').doc('lead_user_1').set({
           role: 'club_lead',
           clubId: 'club_algiers_tech',
           email: 'lead@club.dz',
+          displayName: 'Society President',
         });
-        // Regular student user
-        await db.collection('users').doc('student_user_1').set({
-          role: 'student',
-          email: 'student@univ.dz',
+        // Baseline visitor user (provisioned by auth trigger on first sign-in)
+        await db.collection('users').doc('visitor_user_1').set({
+          role: 'visitor',
+          clubId: null,
+          email: 'visitor@univ.dz',
+          displayName: 'Student Visitor',
+          bio: 'First-year computer science student.',
         });
       });
     }
@@ -123,9 +128,9 @@ describe('NACS Firestore Security Rules Test Suite', () => {
       await assertFails(unauthedDb.collection('events').doc('event_pending').get());
     });
 
-    it('denies non-board user from reading pending event of other creators', async () => {
-      const otherUserDb = testEnv.authenticatedContext('student_user_1').firestore();
-      await assertFails(otherUserDb.collection('events').doc('event_pending').get());
+    it('denies non-board visitor from reading pending event of other creators', async () => {
+      const visitorDb = testEnv.authenticatedContext('visitor_user_1').firestore();
+      await assertFails(visitorDb.collection('events').doc('event_pending').get());
     });
 
     it('allows creator to inspect their own pending event', async () => {
@@ -190,7 +195,7 @@ describe('NACS Firestore Security Rules Test Suite', () => {
     });
 
     it('denies client direct write to projects', async () => {
-      const userDb = testEnv.authenticatedContext('student_user_1').firestore();
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
       await assertFails(
         userDb.collection('projects').doc('proj_new').set({
           title: 'Bypass Function Project',
@@ -223,7 +228,7 @@ describe('NACS Firestore Security Rules Test Suite', () => {
 
     it('denies non-board user with different email from reading applications', async () => {
       const otherDb = testEnv
-        .authenticatedContext('student_user_1', { email: 'unrelated@univ.dz' })
+        .authenticatedContext('visitor_user_1', { email: 'unrelated@univ.dz' })
         .firestore();
       await assertFails(otherDb.collection('applications').doc('app_secret').get());
     });
@@ -251,58 +256,93 @@ describe('NACS Firestore Security Rules Test Suite', () => {
   });
 
   // ===========================================================================
-  // 5. USERS COLLECTION
+  // 5. USERS COLLECTION (EXPLICIT ALLOWLIST & ZERO-ELEVATION GUARANTEES)
   // ===========================================================================
   describe('Users Collection', () => {
     it('allows owner to read their own profile', async () => {
-      const ownerDb = testEnv.authenticatedContext('student_user_1').firestore();
-      await assertSucceeds(ownerDb.collection('users').doc('student_user_1').get());
+      const ownerDb = testEnv.authenticatedContext('visitor_user_1').firestore();
+      await assertSucceeds(ownerDb.collection('users').doc('visitor_user_1').get());
     });
 
     it('allows board member to read another user profile', async () => {
       const boardDb = testEnv.authenticatedContext('board_user_1').firestore();
-      await assertSucceeds(boardDb.collection('users').doc('student_user_1').get());
+      await assertSucceeds(boardDb.collection('users').doc('visitor_user_1').get());
     });
 
-    it('denies regular user from reading another user profile', async () => {
-      const userDb = testEnv.authenticatedContext('student_user_1').firestore();
+    it('denies regular visitor from reading another user profile', async () => {
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
       await assertFails(userDb.collection('users').doc('admin_user_1').get());
     });
 
-    it('allows user to update their own profile fields (e.g. displayName)', async () => {
-      const userDb = testEnv.authenticatedContext('student_user_1').firestore();
+    it('allows user to update fields in the explicit ALLOWLIST (displayName, bio, photoURL)', async () => {
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
       await assertSucceeds(
-        userDb.collection('users').doc('student_user_1').update({
-          displayName: 'Updated Name',
+        userDb.collection('users').doc('visitor_user_1').update({
+          displayName: 'Updated Student Name',
+          bio: 'Updated bio text.',
+          photoURL: 'https://example.com/avatar.jpg',
         })
       );
     });
 
-    it('strictly PREVENTS user from mutating role (privilege escalation prevention)', async () => {
-      const userDb = testEnv.authenticatedContext('student_user_1').firestore();
+    it('strictly PREVENTS user from mutating role (privilege escalation blocked)', async () => {
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
       await assertFails(
-        userDb.collection('users').doc('student_user_1').update({
+        userDb.collection('users').doc('visitor_user_1').update({
           role: 'admin',
         })
       );
     });
 
     it('strictly PREVENTS user from mutating clubId directly', async () => {
-      const userDb = testEnv.authenticatedContext('student_user_1').firestore();
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
       await assertFails(
-        userDb.collection('users').doc('student_user_1').update({
+        userDb.collection('users').doc('visitor_user_1').update({
           clubId: 'hacked_club_id',
         })
       );
     });
 
-    it('denies client from creating a new user document directly', async () => {
-      const attackerDb = testEnv.authenticatedContext('attacker').firestore();
+    it('strictly PREVENTS user from writing unwhitelisted schema fields (default-deny)', async () => {
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
       await assertFails(
-        attackerDb.collection('users').doc('attacker').set({
-          role: 'admin',
+        userDb.collection('users').doc('visitor_user_1').update({
+          isSuperuser: true,
+          reputationScore: 9999,
         })
       );
+    });
+
+    it('denies client from creating a new user document directly (handled by auth trigger)', async () => {
+      const attackerDb = testEnv.authenticatedContext('new_attacker').firestore();
+      await assertFails(
+        attackerDb.collection('users').doc('new_attacker').set({
+          role: 'admin',
+          email: 'attacker@bad.com',
+        })
+      );
+    });
+
+    it('denies client from deleting a user document', async () => {
+      const userDb = testEnv.authenticatedContext('visitor_user_1').firestore();
+      await assertFails(userDb.collection('users').doc('visitor_user_1').delete());
+    });
+
+    it('allows server-side admin SDK / Cloud Functions to elevate user role', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await db.collection('users').doc('visitor_user_1').update({
+          role: 'board',
+        });
+      });
+
+      // Verify the updated role is now reflected
+      const boardDb = testEnv.authenticatedContext('admin_user_1').firestore();
+      const updatedDoc = await boardDb.collection('users').doc('visitor_user_1').get();
+      const data = updatedDoc.data();
+      if (data?.role !== 'board') {
+        throw new Error('Server-side role elevation failed.');
+      }
     });
   });
 });

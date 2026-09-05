@@ -5,4 +5,6 @@ if (!admin.apps.length) {
 }
 
 export { submitApplication, approveApplication } from './handlers/applications';
+export { onUserCreated } from './handlers/auth';
+export { assignUserRole } from './handlers/roles';
 export { scheduledFirestoreBackup } from './backup/scheduled-backup';

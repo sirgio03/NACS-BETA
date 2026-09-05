@@ -1,8 +1,32 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
     path: '',
+    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+  },
+  {
+    path: 'auth/login',
+    loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent),
+  },
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent),
+  },
+  // Protected Route: Board / Admin Portal (UX convenience guard reflecting server-side rules)
+  {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['board', 'admin'] },
+    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+  },
+  // Protected Route: Club Lead Workspace (UX convenience guard reflecting server-side rules)
+  {
+    path: 'lead',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['club_lead', 'board', 'admin'] },
     loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
   },
   {

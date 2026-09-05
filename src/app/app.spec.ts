@@ -1,12 +1,30 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { signal } from '@angular/core';
 import { App } from './app';
+import { AuthService } from './core/services/auth.service';
 
 describe('App', () => {
+  const mockAuthService = {
+    currentUser: signal(null),
+    userProfile: signal(null),
+    loading: signal(false),
+    isAuthenticated: signal(false),
+    userRole: signal('visitor'),
+    isClubLead: signal(false),
+    isBoard: signal(false),
+    isAdmin: signal(false),
+    isBoardOrAdmin: signal(false),
+    signOut: jasmine.createSpy('signOut').and.returnValue(Promise.resolve()),
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: mockAuthService },
+      ],
     }).compileComponents();
   });
 
