@@ -5,9 +5,11 @@
 /tmp
 /out-tsc
 /bazel-out
+functions/lib/
 
 # Node
 /node_modules
+functions/node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -41,3 +43,15 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Firebase & Emulators
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Secrets and Environment Variables (Strict Zero-Secret Policy)
+.env
+.env.local
+.env.*.local
+*.service-account.json

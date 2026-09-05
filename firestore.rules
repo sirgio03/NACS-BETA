@@ -1,0 +1,113 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // GLOBAL DEFAULT DENY
+    // All paths not explicitly permitted below are rejected unconditionally.
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function userExists() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return userExists() && getUserData().role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isBoard() {
+      return hasRole('board');
+    }
+
+    function isBoardOrAdmin() {
+      return isAuthenticated() && userExists() && 
+        (getUserData().role == 'board' || getUserData().role == 'admin');
+    }
+
+    // =========================================================================
+    // 1. CLUBS COLLECTION
+    // Directory is publicly readable.
+    // All writes must go through Cloud Functions (Admin SDK) to ensure verification
+    // and leadership consistency.
+    // =========================================================================
+    match /clubs/{clubId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // 2. EVENTS COLLECTION
+    // RULE: Nothing user-submitted is publicly readable until status == 'approved'.
+    // Pending or flagged events may only be viewed by the creator or board/admin.
+    // All writes go through Cloud Functions for server-side conflict/date validation.
+    // =========================================================================
+    match /events/{eventId} {
+      allow read: if resource.data.status == 'approved'
+                  || (isAuthenticated() && (resource.data.createdBy == request.auth.uid || isBoardOrAdmin()));
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // 3. PROJECTS COLLECTION
+    // RULE: Only 'approved' projects appear in the public showcase gallery.
+    // Submitter or board/admin can inspect pending projects.
+    // All writes go through Cloud Functions for image count and tag validation.
+    // =========================================================================
+    match /projects/{projectId} {
+      allow read: if resource.data.status == 'approved'
+                  || (isAuthenticated() && (resource.data.submittedBy == request.auth.uid || isBoardOrAdmin()));
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // 4. APPLICATIONS COLLECTION
+    // Confidential: Only applicant (matching contactEmail) or board/admin can read.
+    // Direct client writes are forbidden; submissions go through callable Cloud
+    // Function (submitApplication) with App Check bot protection and schema checks.
+    // =========================================================================
+    match /applications/{applicationId} {
+      allow read: if isAuthenticated() && 
+                     (request.auth.token.email == resource.data.contactEmail || isBoardOrAdmin());
+      allow write: if false;
+    }
+
+    // =========================================================================
+    // 5. USERS COLLECTION
+    // User profile data.
+    // Read: authenticated owner or board/admin.
+    // Create / Delete: forbidden from client (provisioned via Cloud Functions).
+    // Update: authenticated owner can only modify non-sensitive profile fields
+    //         and CANNOT alter 'role' or 'clubId'.
+    // =========================================================================
+    match /users/{uid} {
+      allow read: if isAuthenticated() && (request.auth.uid == uid || isBoardOrAdmin());
+      allow create: if false;
+      allow delete: if false;
+      allow update: if isOwner(uid) && 
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'clubId']);
+    }
+  }
+}

@@ -1,1 +1,174 @@
-/* You can add global styles to this file, and also import other style files */
+// =============================================================================
+// NACS GLOBAL STYLES
+// National Association of Campus Societies
+// =============================================================================
+
+@use 'styles/variables' as *;
+@use 'styles/typography' as *;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--nacs-bg);
+  color: var(--nacs-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--nacs-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--nacs-primary-dark);
+    text-decoration: underline;
+  }
+}
+
+// --- Institutional Buttons (Sharp 4-6px corners, 1-2px elevation) ---
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: var(--elevation-1);
+  text-decoration: none;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.btn-primary {
+  background-color: var(--nacs-primary);
+  color: #ffffff;
+  border-color: var(--nacs-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--nacs-primary-dark);
+    border-color: var(--nacs-primary-dark);
+    box-shadow: var(--elevation-2);
+    text-decoration: none;
+    color: #ffffff;
+  }
+}
+
+.btn-accent {
+  background-color: var(--nacs-accent);
+  color: #1a1a2e;
+  border-color: var(--nacs-accent);
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background-color: var(--nacs-accent-hover);
+    border-color: var(--nacs-accent-hover);
+    box-shadow: var(--elevation-2);
+    text-decoration: none;
+  }
+}
+
+.btn-outline {
+  background-color: #ffffff;
+  color: var(--nacs-primary);
+  border-color: var(--nacs-border-strong);
+
+  &:hover:not(:disabled) {
+    background-color: var(--nacs-primary-soft);
+    border-color: var(--nacs-primary);
+    text-decoration: none;
+  }
+}
+
+// --- Badges & Status Chips ---
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-approved, .badge-success {
+  background-color: var(--nacs-success-soft);
+  color: var(--nacs-success);
+  border: 1px solid rgba(31, 168, 100, 0.25);
+}
+
+.badge-pending, .badge-warning {
+  background-color: var(--nacs-pending-soft);
+  color: var(--nacs-pending);
+  border: 1px solid rgba(224, 163, 10, 0.3);
+}
+
+.badge-flagged, .badge-danger {
+  background-color: var(--nacs-danger-soft);
+  color: var(--nacs-danger);
+  border: 1px solid rgba(217, 37, 80, 0.25);
+}
+
+.badge-accent {
+  background-color: var(--nacs-accent);
+  color: #1a1a2e;
+}
+
+// --- Cards & Surfaces ---
+.card {
+  background-color: var(--nacs-surface);
+  border: 1px solid var(--nacs-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-1);
+  padding: 1.5rem;
+}
+
+.card-interactive {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--nacs-border-strong);
+    box-shadow: var(--elevation-interactive);
+  }
+}
+
+// --- Layout Utilities ---
+.container {
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.section-divider {
+  height: 3px;
+  background: var(--nacs-accent);
+  width: 48px;
+  margin: 1rem 0 1.5rem 0;
+  border-radius: var(--radius-xs);
+}

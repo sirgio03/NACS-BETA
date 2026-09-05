@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "nacs-platform-staging",
+    "staging": "nacs-platform-staging",
+    "prod": "nacs-platform-prod"
+  }
+}

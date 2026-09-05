@@ -1,0 +1,60 @@
+name: NACS Platform CI Pipeline
+
+on:
+  pull_request:
+    branches: [main, staging, develop]
+  push:
+    branches: [main, staging]
+
+jobs:
+  validate:
+    name: Lint, Test, Rules Verify & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java (Required for Firebase Emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install Frontend & Root Dependencies
+        run: npm ci
+
+      - name: Install Functions Dependencies
+        run: |
+          cd functions
+          npm ci
+
+      - name: Run Frontend Unit Tests (Chrome Headless)
+        run: npm run test
+
+      - name: Build Cloud Functions
+        run: npm run build:functions
+
+      - name: Execute Firestore Security Rules Emulator Tests
+        run: npx firebase emulators:exec --only firestore "npm run test:rules"
+
+      - name: Build Angular Staging Configuration
+        run: npm run build:staging
+
+      - name: Build Angular Production Configuration
+        run: npm run build:prod
+
+      - name: Deploy Preview Channel on Pull Request (Staging Project)
+        if: github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_NACS_PLATFORM_STAGING }}
+          projectId: nacs-platform-staging
+          channelId: pr-${{ github.event.number }}

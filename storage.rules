@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // =========================================================================
+    // DEFAULT DENY
+    // All unmatched paths are rejected.
+    // =========================================================================
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Strict raster image whitelist: SVGs are explicitly excluded to prevent Stored XSS vectors.
+    function isRasterImage() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    function isUnderSize(maxMb) {
+      return request.resource.size <= maxMb * 1024 * 1024;
+    }
+
+    // =========================================================================
+    // CLUB ASSETS (Logos, badges)
+    // Max 2MB, raster image only (JPEG, PNG, WebP).
+    // Publicly readable, authenticated write.
+    // =========================================================================
+    match /clubs/{clubId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() 
+                   && isRasterImage() 
+                   && isUnderSize(2);
+    }
+
+    // =========================================================================
+    // PROJECT SHOWCASE ASSETS (Screenshots, gallery images)
+    // Max 5MB, raster image only (JPEG, PNG, WebP).
+    // Publicly readable, authenticated write.
+    // =========================================================================
+    match /projects/{projectId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() 
+                   && isRasterImage() 
+                   && isUnderSize(5);
+    }
+  }
+}

@@ -1,0 +1,129 @@
+@use '../styles/variables' as *;
+
+.nacs-app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--nacs-bg);
+}
+
+.env-banner {
+  background-color: #1a1a2e;
+  color: #f7f7fc;
+  font-size: 0.8rem;
+  padding: 0.35rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 212, 0, 0.4);
+
+  .env-tag {
+    background-color: var(--nacs-accent);
+    color: #1a1a2e;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-xs);
+    letter-spacing: 0.05em;
+  }
+}
+
+.nacs-header {
+  background-color: var(--nacs-primary);
+  color: var(--nacs-text-inverted);
+  border-bottom: 2px solid var(--nacs-accent);
+  box-shadow: var(--elevation-1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-mark {
+  border-radius: var(--radius-xs);
+  box-shadow: 0 0 0 2px rgba(255, 212, 0, 0.3);
+  object-fit: cover;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-acronym {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.brand-name {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.01em;
+}
+
+.brand-subtext {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  direction: rtl;
+  margin-top: 0.1rem;
+}
+
+.main-content {
+  flex: 1;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.nacs-footer {
+  background-color: var(--nacs-surface);
+  border-top: 1px solid var(--nacs-border);
+  padding: 1.5rem;
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-mark {
+  border-radius: var(--radius-xs);
+}
+
+.footer-copy {
+  font-size: 0.85rem;
+  color: var(--nacs-text-muted);
+}

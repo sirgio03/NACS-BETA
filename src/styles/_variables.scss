@@ -1,0 +1,90 @@
+// =============================================================================
+// NACS DESIGN SYSTEM - DESIGN TOKENS & VARIABLES
+// Brand Identity: Confident, institutional, sharp, authoritative.
+// =============================================================================
+
+// --- Brand Colors ---
+$nacs-primary: #0d0dff;          // Deep blue: backgrounds, headers, primary buttons
+$nacs-primary-dark: #0909b8;     // Darker hover state
+$nacs-primary-light: #3d3dff;    // Active / focus state
+$nacs-primary-soft: #ededff;     // Tinted background for active items
+
+$nacs-accent: #ffd400;           // Yellow: highlights, badges, dividers, CTAs
+$nacs-accent-hover: #e6bf00;     // Accent hover
+$nacs-accent-soft: #fff9d6;      // Soft yellow highlight / badge background
+
+$nacs-bg: #f7f7fc;               // Neutral background (light gray-blue)
+$nacs-surface: #ffffff;          // Pure white card / panel surface
+$nacs-surface-alt: #f0f1f8;      // Secondary surface / table headers
+$nacs-border: #e2e4ef;           // Structural subtle border
+$nacs-border-strong: #c8cbdc;    // High-contrast border
+
+$nacs-text: #1a1a2e;             // Default body text
+$nacs-text-muted: #5e6278;       // Secondary / meta text
+$nacs-text-inverted: #ffffff;     // Text on primary / dark backgrounds
+
+// --- Status Colors ---
+$nacs-success: #1fa864;          // Approved state (green)
+$nacs-success-soft: #eaf8f1;     // Approved badge background
+$nacs-pending: #e0a30a;          // Pending review state (amber)
+$nacs-pending-soft: #fcf6e8;     // Pending badge background
+$nacs-danger: #d92550;           // Conflict / rejected state (crimson)
+$nacs-danger-soft: #fde8ed;      // Danger badge background
+
+// --- Typography Stacks ---
+$font-family-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// --- Geometric & Structural Constraints (Strict Institutional Feel) ---
+$radius-xs: 2px;
+$radius-sm: 4px;                 // Standard sharp radius
+$radius-md: 6px;                 // Container / card radius (max 8px)
+$radius-lg: 8px;                 // Maximum permitted border radius
+$radius-pill: 9999px;            // Strictly for pill badges
+
+// --- Subtle Elevations (Max 1-2px Elevation) ---
+$elevation-1: 0 1px 2px rgba(26, 26, 46, 0.05);
+$elevation-2: 0 2px 4px rgba(26, 26, 46, 0.08);
+$elevation-interactive: 0 2px 6px rgba(13, 13, 255, 0.12);
+
+// --- CSS Custom Properties Exposed on :root ---
+:root {
+  --nacs-primary: #{$nacs-primary};
+  --nacs-primary-dark: #{$nacs-primary-dark};
+  --nacs-primary-light: #{$nacs-primary-light};
+  --nacs-primary-soft: #{$nacs-primary-soft};
+
+  --nacs-accent: #{$nacs-accent};
+  --nacs-accent-hover: #{$nacs-accent-hover};
+  --nacs-accent-soft: #{$nacs-accent-soft};
+
+  --nacs-bg: #{$nacs-bg};
+  --nacs-surface: #{$nacs-surface};
+  --nacs-surface-alt: #{$nacs-surface-alt};
+  --nacs-border: #{$nacs-border};
+  --nacs-border-strong: #{$nacs-border-strong};
+
+  --nacs-text: #{$nacs-text};
+  --nacs-text-muted: #{$nacs-text-muted};
+  --nacs-text-inverted: #{$nacs-text-inverted};
+
+  --nacs-success: #{$nacs-success};
+  --nacs-success-soft: #{$nacs-success-soft};
+  --nacs-pending: #{$nacs-pending};
+  --nacs-pending-soft: #{$nacs-pending-soft};
+  --nacs-danger: #{$nacs-danger};
+  --nacs-danger-soft: #{$nacs-danger-soft};
+
+  --font-display: #{$font-family-display};
+  --font-body: #{$font-family-body};
+
+  --radius-xs: #{$radius-xs};
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+  --radius-pill: #{$radius-pill};
+
+  --elevation-1: #{$elevation-1};
+  --elevation-2: #{$elevation-2};
+  --elevation-interactive: #{$elevation-interactive};
+}

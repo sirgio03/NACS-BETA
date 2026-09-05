@@ -1,0 +1,56 @@
+name: NACS Platform CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  deploy:
+    name: Deploy to Firebase Hosting & Functions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java (Required for Emulators / CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          cd functions && npm ci
+
+      - name: Build Functions
+        run: npm run build:functions
+
+      # Staging Deployment
+      - name: Build & Deploy Staging
+        if: github.ref == 'refs/heads/staging'
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npm run build:staging
+          npx firebase use staging
+          npx firebase deploy --only hosting,firestore:rules,firestore:indexes,storage,functions
+
+      # Production Deployment
+      - name: Build & Deploy Production
+        if: github.ref == 'refs/heads/main'
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npm run build:prod
+          npx firebase use prod
+          npx firebase deploy --only hosting,firestore:rules,firestore:indexes,storage,functions
