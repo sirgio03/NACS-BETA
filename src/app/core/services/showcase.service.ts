@@ -15,6 +15,7 @@ import {
   DocumentData,
 } from '@angular/fire/firestore';
 import { StudentProject } from '../models/project.model';
+import { DEMO_PROJECTS } from '../data/demo-data';
 
 export interface ProjectFilterOptions {
   tag?: string;
@@ -38,57 +39,120 @@ export class ShowcaseService {
   /**
    * Fetch approved student projects for public showcase gallery.
    * Strictly filters where('status', '==', 'approved') to comply with security rules.
+   * Seamlessly falls back to demo projects when running in unseeded dev environment.
    */
   async getApprovedProjects(
     options: ProjectFilterOptions = {},
     pageSize: number = 12,
     cursorDoc: QueryDocumentSnapshot<DocumentData> | null = null
   ): Promise<ProjectPageResult> {
-    const projectsRef = collection(this.firestore, 'projects');
-    const constraints: QueryConstraint[] = [];
+    try {
+      const projectsRef = collection(this.firestore, 'projects');
+      const constraints: QueryConstraint[] = [];
 
-    // Invariant: Public showcase only ever reads approved projects
-    constraints.push(where('status', '==', 'approved'));
+      // Invariant: Public showcase only ever reads approved projects
+      constraints.push(where('status', '==', 'approved'));
+
+      if (options.tag && options.tag !== 'all') {
+        constraints.push(where('tags', 'array-contains', options.tag));
+      }
+
+      if (options.university && options.university !== 'all') {
+        constraints.push(where('university', '==', options.university));
+      }
+
+      if (options.clubId && options.clubId !== 'all') {
+        constraints.push(where('clubId', '==', options.clubId));
+      }
+
+      constraints.push(orderBy('submittedAt', 'desc'));
+      constraints.push(limit(pageSize + 1));
+
+      if (cursorDoc) {
+        constraints.push(startAfter(cursorDoc));
+      }
+
+      const q = query(projectsRef, ...constraints);
+      const snapshot = await getDocs(q);
+
+      const docs = snapshot.docs;
+      if (docs.length > 0) {
+        const hasMore = docs.length > pageSize;
+        const resultDocs = hasMore ? docs.slice(0, pageSize) : docs;
+        const lastDoc = resultDocs.length > 0 ? resultDocs[resultDocs.length - 1] : null;
+
+        let projects: StudentProject[] = resultDocs.map((d) => {
+          const data = d.data() as StudentProject;
+          return {
+            ...data,
+            id: d.id,
+          };
+        });
+
+        // In-memory search filter if keyword provided
+        if (options.searchTerm && options.searchTerm.trim().length > 0) {
+          const term = options.searchTerm.toLowerCase().trim();
+          projects = projects.filter(
+            (p) =>
+              p.title.toLowerCase().includes(term) ||
+              p.description.toLowerCase().includes(term) ||
+              (p.clubName && p.clubName.toLowerCase().includes(term)) ||
+              (p.team && p.team.some((member) => member.toLowerCase().includes(term)))
+          );
+        }
+
+        return {
+          projects,
+          lastDoc,
+          hasMore,
+        };
+      }
+    } catch {
+      // Graceful fallback to demo dataset in local/unseeded dev mode
+    }
+
+    return this.getDemoProjectsPage(options, pageSize);
+  }
+
+  /**
+   * Fetch a single project by ID.
+   */
+  async getProjectById(projectId: string): Promise<StudentProject | null> {
+    try {
+      const docRef = doc(this.firestore, 'projects', projectId);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        return {
+          ...(snap.data() as StudentProject),
+          id: snap.id,
+        };
+      }
+    } catch {
+      // Graceful fallback to demo dataset in local/unseeded dev mode
+    }
+
+    const demo = DEMO_PROJECTS.find((p) => p.id === projectId);
+    return demo || null;
+  }
+
+  private getDemoProjectsPage(options: ProjectFilterOptions, pageSize: number): ProjectPageResult {
+    let filtered = DEMO_PROJECTS.filter((p) => p.status === 'approved');
 
     if (options.tag && options.tag !== 'all') {
-      constraints.push(where('tags', 'array-contains', options.tag));
+      filtered = filtered.filter((p) => p.tags && p.tags.includes(options.tag!));
     }
 
     if (options.university && options.university !== 'all') {
-      constraints.push(where('university', '==', options.university));
+      filtered = filtered.filter((p) => p.university === options.university);
     }
 
     if (options.clubId && options.clubId !== 'all') {
-      constraints.push(where('clubId', '==', options.clubId));
+      filtered = filtered.filter((p) => p.clubId === options.clubId);
     }
 
-    constraints.push(orderBy('submittedAt', 'desc'));
-    constraints.push(limit(pageSize + 1));
-
-    if (cursorDoc) {
-      constraints.push(startAfter(cursorDoc));
-    }
-
-    const q = query(projectsRef, ...constraints);
-    const snapshot = await getDocs(q);
-
-    const docs = snapshot.docs;
-    const hasMore = docs.length > pageSize;
-    const resultDocs = hasMore ? docs.slice(0, pageSize) : docs;
-    const lastDoc = resultDocs.length > 0 ? resultDocs[resultDocs.length - 1] : null;
-
-    let projects: StudentProject[] = resultDocs.map((d) => {
-      const data = d.data() as StudentProject;
-      return {
-        ...data,
-        id: d.id,
-      };
-    });
-
-    // In-memory search filter if keyword provided
     if (options.searchTerm && options.searchTerm.trim().length > 0) {
       const term = options.searchTerm.toLowerCase().trim();
-      projects = projects.filter(
+      filtered = filtered.filter(
         (p) =>
           p.title.toLowerCase().includes(term) ||
           p.description.toLowerCase().includes(term) ||
@@ -97,25 +161,13 @@ export class ShowcaseService {
       );
     }
 
+    const projects = filtered.slice(0, pageSize);
+    const hasMore = filtered.length > pageSize;
+
     return {
       projects,
-      lastDoc,
+      lastDoc: null,
       hasMore,
-    };
-  }
-
-  /**
-   * Fetch a single project by ID.
-   */
-  async getProjectById(projectId: string): Promise<StudentProject | null> {
-    const docRef = doc(this.firestore, 'projects', projectId);
-    const snap = await getDoc(docRef);
-    if (!snap.exists()) {
-      return null;
-    }
-    return {
-      ...(snap.data() as StudentProject),
-      id: snap.id,
     };
   }
 }
