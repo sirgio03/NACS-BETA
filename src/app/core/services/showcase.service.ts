@@ -143,7 +143,13 @@ export class ShowcaseService {
     }
 
     if (options.university && options.university !== 'all') {
-      filtered = filtered.filter((p) => p.university === options.university);
+      const u = options.university.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          (p.university && p.university.toLowerCase() === u) ||
+          (p.university && p.university.toLowerCase().includes(u)) ||
+          (p.university && u.includes(p.university.toLowerCase()))
+      );
     }
 
     if (options.clubId && options.clubId !== 'all') {

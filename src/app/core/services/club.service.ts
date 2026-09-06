@@ -157,7 +157,13 @@ export class ClubService {
     }
 
     if (options.university && options.university !== 'all') {
-      filtered = filtered.filter((c) => c.university === options.university);
+      const u = options.university.toLowerCase();
+      filtered = filtered.filter(
+        (c) =>
+          c.university.toLowerCase() === u ||
+          c.university.toLowerCase().includes(u) ||
+          u.includes(c.university.toLowerCase())
+      );
     }
 
     if (options.category && options.category !== 'all') {

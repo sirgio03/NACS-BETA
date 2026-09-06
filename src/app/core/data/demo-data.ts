@@ -6,7 +6,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_alpha',
     name: 'Alpha Robotics USTHB',
-    university: 'USTHB (Bab Ezzouar, Algiers)',
+    university: 'Université des Sciences et de la Technologie Houari Boumediène Alger (USTHB)',
     foundingDate: '2018-10-15',
     category: 'tech',
     description:
@@ -29,7 +29,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_esi',
     name: 'ESI ByteCraft Club',
-    university: 'ESI (Oued Smar, Algiers)',
+    university: 'Ecole Nationale Supérieure d\'Informatique (ESI)',
     foundingDate: '2016-09-20',
     category: 'tech',
     description:
@@ -52,7 +52,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_usto',
     name: 'Beta Biotech Society',
-    university: 'USTO-MB (Oran)',
+    university: 'Université des Sciences et de la Technologie d\'Oran (USTO-MB)',
     foundingDate: '2019-03-12',
     category: 'scientific',
     description:
@@ -97,7 +97,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_blida',
     name: 'GameCrafters Blida',
-    university: 'University Ferhat Abbas (Setif 1)',
+    university: 'Université de Sétif 1',
     foundingDate: '2021-02-18',
     category: 'cultural',
     description:
@@ -119,7 +119,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_tlemcen',
     name: 'Cercle Culturel Ibn Khaldoun',
-    university: 'University Abou Bekr Belkaïd (Tlemcen)',
+    university: 'Université de Tlemcen',
     foundingDate: '2017-04-22',
     category: 'cultural',
     description:
@@ -140,7 +140,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_opensource',
     name: 'OpenSource DZ Society',
-    university: 'ENP (El Harrach, Algiers)',
+    university: 'Ecole Nationale Polytechnique (ENP)',
     foundingDate: '2018-01-10',
     category: 'tech',
     description:
@@ -162,7 +162,7 @@ export const DEMO_CLUBS: Club[] = [
   {
     id: 'club_ouargla',
     name: 'GreenTech Sahara',
-    university: 'University Badji Mokhtar (Annaba)',
+    university: 'Université Badji Mokhtar de Annaba',
     foundingDate: '2022-05-30',
     category: 'entrepreneurship',
     description:
@@ -335,7 +335,7 @@ export const DEMO_PROJECTS: StudentProject[] = [
     id: 'demo_proj_1',
     clubId: 'club_alpha',
     clubName: 'Alpha Robotics USTHB',
-    university: 'USTHB (Bab Ezzouar, Algiers)',
+    university: 'Université des Sciences et de la Technologie Houari Boumediène Alger (USTHB)',
     title: 'AeroRover DZ: Autonomous Terrain Mapping Rover',
     team: ['Amina Mansouri', 'Yacine Belkacem', 'Rachid Mebarki'],
     description:
@@ -356,7 +356,7 @@ export const DEMO_PROJECTS: StudentProject[] = [
     id: 'demo_proj_2',
     clubId: 'club_esi',
     clubName: 'ESI ByteCraft Club',
-    university: 'ESI (Oued Smar, Algiers)',
+    university: 'Ecole Nationale Supérieure d\'Informatique (ESI)',
     title: 'Algiers Transit ML: Smart Public Bus Delay Predictor',
     team: ['Mehdi Benali', 'Sarah Cherif', 'Amel Boumediene'],
     description:
@@ -377,7 +377,7 @@ export const DEMO_PROJECTS: StudentProject[] = [
     id: 'demo_proj_3',
     clubId: 'club_usto',
     clubName: 'Beta Biotech Society',
-    university: 'USTO-MB (Oran)',
+    university: 'Université des Sciences et de la Technologie d\'Oran (USTO-MB)',
     title: 'BioPur: Organic Moringa Oleifera Water Purifier',
     team: ['Zineb Dahmani', 'Sofiane Merad'],
     description:
@@ -397,7 +397,7 @@ export const DEMO_PROJECTS: StudentProject[] = [
     id: 'demo_proj_4',
     clubId: 'club_blida',
     clubName: 'GameCrafters Blida',
-    university: 'University Ferhat Abbas (Setif 1)',
+    university: 'Université de Sétif 1',
     title: 'Numidia Chronicles: Echoes of Cirta',
     team: ['Walid Brahimi', 'Nour El Houda', 'Khaled Bensaid'],
     description:
@@ -418,7 +418,7 @@ export const DEMO_PROJECTS: StudentProject[] = [
     id: 'demo_proj_5',
     clubId: 'club_opensource',
     clubName: 'OpenSource DZ Society',
-    university: 'ENP (El Harrach, Algiers)',
+    university: 'Ecole Nationale Polytechnique (ENP)',
     title: 'DZ-Linux: Lightweight Real-Time Kernel for Lab Automation',
     team: ['Billal Loucif', 'Meriem Benaissa'],
     description:

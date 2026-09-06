@@ -7,6 +7,12 @@ import { ClubService, ClubFilterOptions } from '../../core/services/club.service
 import { AuthService } from '../../core/services/auth.service';
 import { Club } from '../../core/models/club.model';
 
+import {
+  ALGERIAN_INSTITUTIONS_BY_WILAYA,
+  ALL_ALGERIAN_INSTITUTIONS,
+  WilayaInstitutions,
+} from '../../core/data/algerian-universities.data';
+
 @Component({
   selector: 'app-club-list',
   standalone: true,
@@ -34,18 +40,8 @@ export class ClubListComponent implements OnInit {
   private lastDocCursor: QueryDocumentSnapshot<DocumentData> | null = null;
   readonly pageSize = 12;
 
-  readonly universities: string[] = [
-    'USTHB (Bab Ezzouar, Algiers)',
-    'ESI (Oued Smar, Algiers)',
-    'USTO-MB (Oran)',
-    'University of Algiers 1 (Benyoucef Benkhedda)',
-    'University of Constantine 1 (Frères Mentouri)',
-    'University Badji Mokhtar (Annaba)',
-    'University Abou Bekr Belkaïd (Tlemcen)',
-    'University Ferhat Abbas (Setif 1)',
-    'University of Batna 2 (Mostefa Ben Boulaïd)',
-    'ENP (El Harrach, Algiers)',
-  ];
+  readonly institutionsByWilaya: WilayaInstitutions[] = ALGERIAN_INSTITUTIONS_BY_WILAYA;
+  readonly universities: string[] = ALL_ALGERIAN_INSTITUTIONS;
 
   readonly categories = [
     { key: 'all', label: 'All Categories' },

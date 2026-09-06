@@ -5,6 +5,11 @@ import { RouterModule } from '@angular/router';
 import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
 import { ShowcaseService, ProjectFilterOptions } from '../../core/services/showcase.service';
 import { StudentProject } from '../../core/models/project.model';
+import {
+  ALGERIAN_INSTITUTIONS_BY_WILAYA,
+  ALL_ALGERIAN_INSTITUTIONS,
+  WilayaInstitutions,
+} from '../../core/data/algerian-universities.data';
 
 @Component({
   selector: 'app-showcase-gallery',
@@ -43,18 +48,8 @@ export class ShowcaseGalleryComponent implements OnInit {
     { key: 'cybersecurity', label: 'Cybersecurity' },
   ];
 
-  readonly universities: string[] = [
-    'USTHB (Bab Ezzouar, Algiers)',
-    'ESI (Oued Smar, Algiers)',
-    'USTO-MB (Oran)',
-    'University of Algiers 1 (Benyoucef Benkhedda)',
-    'University of Constantine 1 (Frères Mentouri)',
-    'University Badji Mokhtar (Annaba)',
-    'University Abou Bekr Belkaïd (Tlemcen)',
-    'University Ferhat Abbas (Setif 1)',
-    'University of Batna 2 (Mostefa Ben Boulaïd)',
-    'ENP (El Harrach, Algiers)',
-  ];
+  readonly institutionsByWilaya: WilayaInstitutions[] = ALGERIAN_INSTITUTIONS_BY_WILAYA;
+  readonly universities: string[] = ALL_ALGERIAN_INSTITUTIONS;
 
   ngOnInit(): void {
     this.loadInitialProjects();

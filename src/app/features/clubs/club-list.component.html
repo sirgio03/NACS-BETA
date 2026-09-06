@@ -41,9 +41,13 @@
           (change)="onFilterChange()"
           class="form-select"
         >
-          <option value="all">All Algerian Universities</option>
-          @for (univ of universities; track univ) {
-            <option [value]="univ">{{ univ }}</option>
+          <option value="all">All Algerian Universities (48 Wilayas)</option>
+          @for (group of institutionsByWilaya; track group.wilayaCode) {
+            <optgroup [label]="group.wilayaCode + ' - ' + group.wilayaName">
+              @for (univ of group.institutions; track univ) {
+                <option [value]="univ">{{ univ }}</option>
+              }
+            </optgroup>
           }
         </select>
       </div>
