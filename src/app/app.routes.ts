@@ -68,6 +68,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'clubs',
+    redirectTo: '',
   },
 ];

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { UpperCasePipe } from '@angular/common';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/services/auth.service';
@@ -8,7 +8,7 @@ import { ThemeService } from './core/services/theme.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, UpperCasePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, UpperCasePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
