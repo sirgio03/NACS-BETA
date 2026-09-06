@@ -1,0 +1,135 @@
+<main class="landing-page" role="main">
+  <!-- 1. Hero Section -->
+  <section class="hero-section" aria-labelledby="hero-headline">
+    <div class="hero-container">
+      <div class="institutional-badge" role="note">
+        <span class="badge-index" aria-hidden="true">NACS</span>
+        <span class="badge-label">National Federation Infrastructure</span>
+      </div>
+
+      <h1 id="hero-headline" class="hero-headline">
+        The Digital Backbone of Algerian Student Tech Societies.
+      </h1>
+
+      <p class="hero-subheadline">
+        A unified digital infrastructure connecting, verifying, and empowering scientific clubs, GDG Chapters, and tech communities across all 58 Wilayas.
+      </p>
+
+      <div class="hero-cta-group">
+        <a routerLink="/clubs" class="cta-btn cta-btn-primary">
+          Explore the Directory
+        </a>
+        <a routerLink="/auth/register" class="cta-btn cta-btn-secondary">
+          Create an Account to Join
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. The Origin: Born from a GDG Vision -->
+  <section class="origin-section" aria-labelledby="origin-heading">
+    <div class="section-container">
+      <div class="institutional-badge">
+        <span class="badge-index" aria-hidden="true">01</span>
+        <span class="badge-label">Foundational Genesis</span>
+      </div>
+      <h2 id="origin-heading" class="section-heading">How It Started</h2>
+      <p class="section-body">
+        What began as a localized initiative within a Google Developer Group (GDG) to connect university scientific clubs quickly revealed a massive, nationwide need. We realized that solving fragmentation for one campus wasn't enough. NACS was built to scale that original GDG vision into a unified, national infrastructure, ensuring that no student innovation is ever lost in silos again.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 & 4. Statement of Identity & Mission Grid -->
+  <section class="mandate-section" aria-label="Federation Mandate and Purpose">
+    <div class="mandate-grid">
+      <!-- 3. Statement of Identity (Who We Are) -->
+      <article class="mandate-card" aria-labelledby="identity-heading">
+        <div class="institutional-badge">
+          <span class="badge-index" aria-hidden="true">02</span>
+          <span class="badge-label">Institutional Identity</span>
+        </div>
+        <h2 id="identity-heading" class="section-heading">Who We Are</h2>
+        <p class="section-body">
+          We are the definitive federation for Algerian university tech clubs, Google Developer Groups (GDG), IEEE student branches, and scientific societies. NACS is built by students, for students, to bridge the gap between isolated campus initiatives and a thriving national tech ecosystem. We act as the official accreditation body and operational hub for student leadership across the country.
+        </p>
+      </article>
+
+      <!-- 4. The Mission (Why We Are Here) -->
+      <article class="mandate-card" aria-labelledby="mission-heading">
+        <div class="institutional-badge">
+          <span class="badge-index" aria-hidden="true">03</span>
+          <span class="badge-label">Strategic Directive</span>
+        </div>
+        <h2 id="mission-heading" class="section-heading">Why We Are Here</h2>
+        <p class="section-body">
+          For too long, the Algerian student tech ecosystem has been completely fragmented. Great hackathons clash on the same weekend, brilliant student projects disappear after graduation, and ambitious clubs have no formal way to cross-promote. We are here to solve this. NACS provides the shared infrastructure required to eliminate scheduling conflicts, verify legitimate clubs, protect student data, and permanently showcase the engineering and design achievements of Algerian youth.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 5. Q&A (FAQ Section) - Lazily Loaded on Viewport -->
+  @defer (on viewport) {
+    <section class="faq-section" id="faq-section" aria-labelledby="faq-heading">
+      <div class="section-container">
+        <div class="institutional-badge">
+          <span class="badge-index" aria-hidden="true">04</span>
+          <span class="badge-label">Federation Operations</span>
+        </div>
+        <h2 id="faq-heading" class="section-heading">Frequently Asked Questions</h2>
+        
+        <div class="faq-accordion" role="region" aria-label="Frequently Asked Questions">
+          @for (faq of faqs; track faq.id) {
+            <div class="faq-item" [class.is-expanded]="expandedFaqId() === faq.id">
+              <h3 class="faq-item-title">
+                <button
+                  type="button"
+                  class="faq-trigger"
+                  (click)="toggleFaq(faq.id)"
+                  [attr.aria-expanded]="expandedFaqId() === faq.id"
+                  [attr.aria-controls]="faq.id + '-panel'"
+                  [id]="faq.id + '-trigger'"
+                >
+                  <span class="faq-question-text">{{ faq.question }}</span>
+                  <span class="faq-icon-wrapper" aria-hidden="true">
+                    <svg
+                      class="faq-chevron"
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                </button>
+              </h3>
+              <div
+                class="faq-panel"
+                [id]="faq.id + '-panel'"
+                role="region"
+                [attr.aria-labelledby]="faq.id + '-trigger'"
+                [hidden]="expandedFaqId() !== faq.id"
+              >
+                <div class="faq-panel-inner">
+                  <p class="faq-answer-text">{{ faq.answer }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  } @placeholder {
+    <div class="faq-placeholder" aria-hidden="true">
+      <div class="placeholder-box"></div>
+      <div class="placeholder-row"></div>
+      <div class="placeholder-row"></div>
+    </div>
+  }
+</main>

@@ -1,91 +1,63 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../../environments/environment';
+import { RouterLink } from '@angular/router';
+
+export interface FaqItem {
+  readonly id: string;
+  readonly question: string;
+  readonly answer: string;
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="foundation-card card">
-      <div class="header-badge">
-        <span class="badge badge-approved">Phase 1: Architecture Foundation</span>
-      </div>
-
-      <h1 class="h1">National Association of Campus Societies</h1>
-      <p class="body-text text-muted">
-        Algerian University Club Federation Platform — Connecting student societies across technology, science, and culture.
-      </p>
-
-      <div class="section-divider"></div>
-
-      <div class="status-grid">
-        <div class="status-item">
-          <span class="status-label">Environment Target</span>
-          <span class="status-value font-bold">{{ envName }}</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Firestore Rules</span>
-          <span class="status-value font-bold text-success">Strict Default-Deny Active</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">App Check Protection</span>
-          <span class="status-value font-bold text-accent">Configured (reCAPTCHA Enterprise)</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Typography System</span>
-          <span class="status-value font-bold">Space Grotesk &amp; Inter (Bundled)</span>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .foundation-card {
-      max-width: 800px;
-      margin: 2rem auto;
-      background: var(--nacs-surface);
-      border: 1px solid var(--nacs-border);
-      border-radius: var(--radius-md);
-      padding: 2.5rem;
-      box-shadow: var(--elevation-1);
-    }
-    .header-badge {
-      margin-bottom: 1.25rem;
-    }
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-      background-color: var(--nacs-bg);
-      padding: 1.25rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--nacs-border);
-    }
-    .status-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .status-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--nacs-text-muted);
-      font-weight: 600;
-    }
-    .status-value {
-      font-size: 0.95rem;
-      color: var(--nacs-text);
-    }
-    .text-success {
-      color: var(--nacs-success);
-    }
-    .text-accent {
-      color: #996e00;
-    }
-  `],
+  imports: [CommonModule, RouterLink],
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  readonly envName = environment.environmentName.toUpperCase();
+  /**
+   * Reactive signal tracking the currently expanded FAQ item ID.
+   * Defaults to null (all collapsed).
+   */
+  readonly expandedFaqId = signal<string | null>(null);
+
+  /**
+   * Institutional FAQ items based on the official NACS charter and platform capabilities.
+   */
+  readonly faqs: readonly FaqItem[] = [
+    {
+      id: 'faq-1',
+      question: 'What exactly does NACS provide?',
+      answer:
+        'NACS offers an official accreditation system, a national events calendar with automatic conflict detection, a verified club directory spanning all 58 wilayas, and a permanent project showcase.',
+    },
+    {
+      id: 'faq-2',
+      question: 'How does the conflict detection work?',
+      answer:
+        'When a club schedules an event, our automated engine scans the national database. If another major event is scheduled in the same wilaya or category on the same dates, the system flags the overlap to prevent cannibalizing attendees and sponsors.',
+    },
+    {
+      id: 'faq-3',
+      question: 'Is my personal data safe?',
+      answer:
+        'Yes. We enforce strict privacy invariants. Public directories only display leadership roles and names. Personal contact information and administrative IDs are mathematically shielded from public API requests.',
+    },
+    {
+      id: 'faq-4',
+      question: 'How does a club join?',
+      answer:
+        'Club leads can apply through our portal by submitting their university endorsement and club mandate. Once verified by the Federation Board, they can create an account to gain full access to the operational workspace.',
+    },
+  ];
+
+  /**
+   * Toggles the open/collapsed state of a given FAQ item.
+   */
+  toggleFaq(id: string): void {
+    this.expandedFaqId.update((currentId) => (currentId === id ? null : id));
+  }
 }
+

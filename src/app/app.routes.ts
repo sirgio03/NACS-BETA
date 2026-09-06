@@ -6,7 +6,11 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'clubs',
+    loadComponent: () => import('./features/home/home.component').then((m) => m.HomeComponent),
+  },
+  {
+    path: 'home',
+    redirectTo: '',
   },
   {
     path: 'clubs',
@@ -29,6 +33,10 @@ export const routes: Routes = [
   {
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'auth/register',
+    redirectTo: 'auth/login',
   },
   {
     path: 'unauthorized',

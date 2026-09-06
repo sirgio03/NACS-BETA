@@ -1,0 +1,440 @@
+// =============================================================================
+// NACS LANDING PAGE STYLES - INSTITUTIONAL NATIONAL FEDERATION THEME
+// High WCAG AA contrast, 1px structural grids, deep navy (#0F172A), gold accents
+// Mobile-first responsive architecture with zero Web3 startup anti-patterns.
+// =============================================================================
+
+:host {
+  display: block;
+  width: 100%;
+
+  // Default / Light Mode Tokens
+  --landing-primary: #0f172a;
+  --landing-primary-hover: #1e293b;
+  --landing-primary-text: #ffffff;
+  --landing-accent: #b45309;
+  --landing-accent-badge-bg: #fef3c7;
+  --landing-accent-badge-border: #fcd34d;
+  --landing-accent-badge-text: #92400e;
+  --landing-bg: var(--nacs-bg, #f8fafc);
+  --landing-surface: var(--nacs-surface, #ffffff);
+  --landing-surface-alt: var(--nacs-surface-alt, #f1f5f9);
+  --landing-border: var(--nacs-border, #e2e8f0);
+  --landing-border-strong: var(--nacs-border-strong, #94a3b8);
+  --landing-text: var(--nacs-text, #0f172a);
+  --landing-text-muted: var(--nacs-text-muted, #334155);
+  --landing-radius: 4px;
+}
+
+// Dark Mode Support via [data-theme="dark"]
+:host-context([data-theme='dark']) {
+  --landing-primary: #707eff;
+  --landing-primary-hover: #8591ff;
+  --landing-primary-text: #0c0e17;
+  --landing-accent: #fbbf24;
+  --landing-accent-badge-bg: rgba(251, 191, 36, 0.12);
+  --landing-accent-badge-border: rgba(251, 191, 36, 0.3);
+  --landing-accent-badge-text: #fde68a;
+  --landing-bg: var(--nacs-bg, #0c0e17);
+  --landing-surface: var(--nacs-surface, #141726);
+  --landing-surface-alt: var(--nacs-surface-alt, #1c2035);
+  --landing-border: var(--nacs-border, #272d47);
+  --landing-border-strong: var(--nacs-border-strong, #3d466e);
+  --landing-text: var(--nacs-text, #f3f4fd);
+  --landing-text-muted: var(--nacs-text-muted, #a3abc8);
+}
+
+// Fallback attribute check on html/body for full browser compatibility
+[data-theme='dark'] :host {
+  --landing-primary: #707eff;
+  --landing-primary-hover: #8591ff;
+  --landing-primary-text: #0c0e17;
+  --landing-accent: #fbbf24;
+  --landing-accent-badge-bg: rgba(251, 191, 36, 0.12);
+  --landing-accent-badge-border: rgba(251, 191, 36, 0.3);
+  --landing-accent-badge-text: #fde68a;
+  --landing-bg: var(--nacs-bg, #0c0e17);
+  --landing-surface: var(--nacs-surface, #141726);
+  --landing-surface-alt: var(--nacs-surface-alt, #1c2035);
+  --landing-border: var(--nacs-border, #272d47);
+  --landing-border-strong: var(--nacs-border-strong, #3d466e);
+  --landing-text: var(--nacs-text, #f3f4fd);
+  --landing-text-muted: var(--nacs-text-muted, #a3abc8);
+}
+
+// -----------------------------------------------------------------------------
+// Layout Container (Mobile-First)
+// -----------------------------------------------------------------------------
+.landing-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 5rem 1.5rem;
+    gap: 2rem;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Institutional Badge & Labels
+// -----------------------------------------------------------------------------
+.institutional-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  background-color: var(--landing-accent-badge-bg);
+  border: 1px solid var(--landing-accent-badge-border);
+  border-radius: var(--landing-radius);
+  margin-bottom: 1rem;
+  width: fit-content;
+
+  .badge-index {
+    font-family: var(--font-display, 'Space Grotesk', monospace, sans-serif);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--landing-accent);
+    letter-spacing: 0.05em;
+  }
+
+  .badge-label {
+    font-family: var(--font-display, 'Space Grotesk', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--landing-accent-badge-text);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Common Section Headings and Typography
+// -----------------------------------------------------------------------------
+.section-heading {
+  font-family: var(--font-display, 'Space Grotesk', -apple-system, sans-serif);
+  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--landing-text);
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.015em;
+}
+
+.section-body {
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.7;
+  color: var(--landing-text-muted);
+  margin: 0;
+}
+
+// -----------------------------------------------------------------------------
+// 1. Hero Section
+// -----------------------------------------------------------------------------
+.hero-section {
+  background-color: var(--landing-surface);
+  border: 1px solid var(--landing-border);
+  border-radius: var(--landing-radius);
+  padding: 2rem 1.25rem;
+  border-top: 4px solid var(--landing-primary);
+
+  @media (min-width: 768px) {
+    padding: 3.5rem 3rem;
+  }
+}
+
+.hero-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-headline {
+  font-family: var(--font-display, 'Space Grotesk', -apple-system, sans-serif);
+  font-size: clamp(1.85rem, 5.5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--landing-text);
+  margin: 0 0 1.25rem 0;
+  letter-spacing: -0.025em;
+}
+
+.hero-subheadline {
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--landing-text-muted);
+  margin: 0 0 2rem 0;
+  max-width: 820px;
+}
+
+.hero-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+
+  @media (min-width: 540px) {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.cta-btn {
+  font-family: var(--font-display, 'Space Grotesk', -apple-system, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-height: 48px;
+  min-width: 44px;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--landing-radius);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--landing-accent);
+    outline-offset: 2px;
+  }
+}
+
+.cta-btn-primary {
+  background-color: var(--landing-primary);
+  color: var(--landing-primary-text);
+  border: 1px solid var(--landing-primary);
+
+  &:hover {
+    background-color: var(--landing-primary-hover);
+    border-color: var(--landing-primary-hover);
+  }
+}
+
+.cta-btn-secondary {
+  background-color: transparent;
+  color: var(--landing-text);
+  border: 1px solid var(--landing-border-strong);
+
+  &:hover {
+    background-color: var(--landing-surface-alt);
+    border-color: var(--landing-text);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 2. The Origin: Born from a GDG Vision
+// -----------------------------------------------------------------------------
+.origin-section {
+  background-color: var(--landing-surface);
+  border: 1px solid var(--landing-border);
+  border-left: 4px solid var(--landing-accent);
+  border-radius: var(--landing-radius);
+  padding: 1.75rem 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 2.5rem;
+  }
+}
+
+.section-container {
+  display: flex;
+  flex-direction: column;
+}
+
+// -----------------------------------------------------------------------------
+// 3 & 4. Statement of Identity & Mission Grid
+// -----------------------------------------------------------------------------
+.mandate-section {
+  width: 100%;
+}
+
+.mandate-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.mandate-card {
+  background-color: var(--landing-surface);
+  border: 1px solid var(--landing-border);
+  border-radius: var(--landing-radius);
+  padding: 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: 768px) {
+    padding: 2.25rem;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 5. Q&A (FAQ Accordion Section)
+// -----------------------------------------------------------------------------
+.faq-section {
+  background-color: var(--landing-surface);
+  border: 1px solid var(--landing-border);
+  border-radius: var(--landing-radius);
+  padding: 1.75rem 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 2.5rem;
+  }
+}
+
+.faq-accordion {
+  margin-top: 1rem;
+  border-top: 1px solid var(--landing-border);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--landing-border);
+  transition: background-color 0.15s ease;
+
+  &.is-expanded {
+    background-color: var(--landing-surface-alt);
+
+    .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-trigger {
+      color: var(--landing-accent);
+    }
+  }
+}
+
+.faq-item-title {
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.faq-trigger {
+  width: 100%;
+  min-height: 52px; // Touch-friendly (exceeds 44px)
+  padding: 0.875rem 0.5rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--landing-text);
+  transition: color 0.15s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--landing-accent);
+    outline-offset: -2px;
+  }
+
+  @media (min-width: 768px) {
+    padding: 1rem 0.75rem;
+  }
+}
+
+.faq-question-text {
+  font-family: var(--font-display, 'Space Grotesk', -apple-system, sans-serif);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.faq-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: var(--landing-text-muted);
+}
+
+.faq-chevron {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-panel {
+  padding: 0 0.5rem 1.25rem 0.5rem;
+
+  @media (min-width: 768px) {
+    padding: 0 0.75rem 1.5rem 0.75rem;
+  }
+}
+
+.faq-panel-inner {
+  border-left: 2px solid var(--landing-accent);
+  padding-left: 0.875rem;
+}
+
+.faq-answer-text {
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--landing-text-muted);
+  margin: 0;
+}
+
+// -----------------------------------------------------------------------------
+// Defer Placeholder (Skeleton Loading State)
+// -----------------------------------------------------------------------------
+.faq-placeholder {
+  background-color: var(--landing-surface);
+  border: 1px solid var(--landing-border);
+  border-radius: var(--landing-radius);
+  padding: 2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .placeholder-box {
+    width: 200px;
+    height: 28px;
+    background-color: var(--landing-surface-alt);
+    border-radius: 2px;
+  }
+
+  .placeholder-row {
+    width: 100%;
+    height: 48px;
+    background-color: var(--landing-surface-alt);
+    border-radius: 2px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Subtle Entrance Animations (WCAG AA Motion Safe)
+// -----------------------------------------------------------------------------
+@keyframes nacsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-container,
+  .origin-section,
+  .mandate-card,
+  .faq-section {
+    animation: nacsFadeIn 0.35s ease-out;
+  }
+}
