@@ -16,8 +16,10 @@ import {
 } from '@angular/fire/firestore';
 import { StudentProject } from '../models/project.model';
 import { DEMO_PROJECTS } from '../data/demo-data';
+import { findWilayaByInstitution } from '../data/algerian-universities.data';
 
 export interface ProjectFilterOptions {
+  wilaya?: string;
   tag?: string;
   university?: string;
   clubId?: string;
@@ -138,8 +140,18 @@ export class ShowcaseService {
   private getDemoProjectsPage(options: ProjectFilterOptions, pageSize: number): ProjectPageResult {
     let filtered = DEMO_PROJECTS.filter((p) => p.status === 'approved');
 
-    if (options.tag && options.tag !== 'all') {
-      filtered = filtered.filter((p) => p.tags && p.tags.includes(options.tag!));
+    if (options.wilaya && options.wilaya !== 'all') {
+      const wTarget = options.wilaya.toLowerCase();
+      filtered = filtered.filter((p) => {
+        if (!p.university) return false;
+        const found = findWilayaByInstitution(p.university);
+        if (!found) return false;
+        return (
+          found.wilayaCode === options.wilaya ||
+          found.wilayaName.toLowerCase() === wTarget ||
+          `${found.wilayaCode} - ${found.wilayaName}`.toLowerCase() === wTarget
+        );
+      });
     }
 
     if (options.university && options.university !== 'all') {

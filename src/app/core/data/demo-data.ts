@@ -1,6 +1,7 @@
 import { Club } from '../models/club.model';
 import { ClubEvent } from '../models/event.model';
 import { StudentProject } from '../models/project.model';
+import { ClubApplication } from '../models/application.model';
 
 export const DEMO_CLUBS: Club[] = [
   {
@@ -436,3 +437,162 @@ export const DEMO_PROJECTS: StudentProject[] = [
     submittedAt: '2026-08-20T16:00:00.000Z',
   },
 ];
+
+export const DEMO_APPLICATIONS: ClubApplication[] = [
+  {
+    id: 'demo_app_1',
+    clubName: 'RoboTech Blida',
+    university: 'Université Saad Dahlab de Blida',
+    contactEmail: 'lead@robotech-blida.dz',
+    status: 'pending',
+    submittedData: {
+      category: 'tech',
+      description: 'Student robotics association aiming to participate in national robotics competitions and host local workshops on autonomous mechanics and embedded systems.',
+      foundingDate: '2022-04-10',
+      leadName: 'Anis Meziani',
+      leadPhone: '+213 555 12 34 56',
+      officialUniversityAffiliationDoc: 'https://storage.nacs.dz/docs/robotech-blida-affiliation.pdf',
+      motivation: 'We want to join the NACS federation to collaborate on joint hackathons with USTHB and ESI clubs.',
+    },
+    createdAt: '2026-09-01T10:00:00.000Z',
+  },
+  {
+    id: 'demo_app_2',
+    clubName: 'AeroPolytechnique ENP',
+    university: 'Ecole Nationale Polytechnique (ENP)',
+    contactEmail: 'aero@enp.edu.dz',
+    status: 'pending',
+    submittedData: {
+      category: 'scientific',
+      description: 'Aeronautics and aerospace student engineering team designing experimental rockets and fixed-wing UAVs.',
+      foundingDate: '2021-11-20',
+      leadName: 'Sarah Hamidi',
+      leadPhone: '+213 661 98 76 54',
+      officialUniversityAffiliationDoc: 'https://storage.nacs.dz/docs/enp-aero-stamp.pdf',
+      motivation: 'Coordinate national rocket launch trials and competitions without date clashes.',
+    },
+    createdAt: '2026-09-02T14:30:00.000Z',
+  },
+  {
+    id: 'demo_app_3',
+    clubName: 'Alpha Robotics USTHB',
+    university: 'Université des Sciences et de la Technologie Houari Boumediène Alger (USTHB)',
+    contactEmail: 'lead@alpharobotics.dz',
+    status: 'approved',
+    submittedData: {
+      category: 'tech',
+      description: 'Premier student society for robotics and intelligent embedded systems.',
+      foundingDate: '2018-10-15',
+      leadName: 'Amina Mansouri',
+    },
+    reviewedBy: 'demo_board_admin_uid',
+    reviewedAt: '2026-01-15T12:00:00.000Z',
+    createdAt: '2026-01-10T10:00:00.000Z',
+  },
+  {
+    id: 'demo_app_4',
+    clubName: 'ESI ByteCraft Club',
+    university: "Ecole Nationale Supérieure d'Informatique (ESI)",
+    contactEmail: 'contact@bytecraft.esi.dz',
+    status: 'approved',
+    submittedData: {
+      category: 'tech',
+      description: 'Computer science and algorithmic problem solving student association.',
+      foundingDate: '2016-09-20',
+      leadName: 'Mehdi Benali',
+    },
+    reviewedBy: 'demo_board_admin_uid',
+    reviewedAt: '2026-01-16T15:00:00.000Z',
+    createdAt: '2026-01-12T10:00:00.000Z',
+  },
+  {
+    id: 'demo_app_5',
+    clubName: 'CryptoTrading Society',
+    university: 'Université de Mostaganem',
+    contactEmail: 'cryptolead@univ-mosta.dz',
+    status: 'rejected',
+    submittedData: {
+      category: 'general',
+      description: 'Speculative day trading and token investment student club.',
+      foundingDate: '2025-01-01',
+      leadName: 'Fouad Larbi',
+    },
+    reviewedBy: 'demo_board_admin_uid',
+    reviewedAt: '2026-03-01T10:00:00.000Z',
+    rejectionReason: 'Does not meet academic student society criteria for technical, scientific, cultural, or social community building under NACS charter.',
+    createdAt: '2026-02-28T09:00:00.000Z',
+  },
+];
+
+export const DEMO_PENDING_EVENTS: ClubEvent[] = [
+  {
+    id: 'demo_pending_evt_1',
+    clubId: 'club_alpha',
+    clubName: 'Alpha Robotics USTHB',
+    title: 'National Autonomous Rover Challenge 2026',
+    date: '2026-10-12T09:00:00.000Z',
+    endDate: '2026-10-12T18:00:00.000Z',
+    location: 'Campus Bab Ezzouar, Esplanade Centrale',
+    wilaya: '16 - Alger',
+    type: 'competition',
+    description: 'Annual outdoor robotics challenge bringing together engineering university teams across Algeria.',
+    status: 'pending',
+    createdBy: 'demo_club_lead_uid',
+    createdAt: '2026-09-05T10:00:00.000Z',
+  },
+  {
+    id: 'demo_pending_evt_2',
+    clubId: 'club_esi',
+    clubName: 'ESI ByteCraft Club',
+    title: 'Algiers Cyber Defense CTF & Red Team Workshop',
+    date: '2026-09-08T09:00:00.000Z',
+    endDate: '2026-09-08T17:00:00.000Z',
+    location: 'Amphi Malek Bennabi, ESI Oued Smar',
+    wilaya: '16 - Alger',
+    type: 'hackathon',
+    conflictContext: "Warning: Schedule overlap (+/- 3 days) with 'National Algorithmic Hackathon 2026' and 'Autonomous Robotics Workshop' in Algiers (Wilaya 16).",
+    description: 'Hands-on capture-the-flag tournament testing ethical hacking, binary exploitation, and defensive hardening.',
+    status: 'flagged_conflict',
+    createdBy: 'demo_user_2',
+    createdAt: '2026-09-05T12:00:00.000Z',
+  },
+];
+
+export const DEMO_PENDING_PROJECTS: StudentProject[] = [
+  {
+    id: 'demo_pending_proj_1',
+    clubId: 'club_alpha',
+    clubName: 'Alpha Robotics USTHB',
+    university: 'Université des Sciences et de la Technologie Houari Boumediène Alger (USTHB)',
+    title: 'SolarTrack AI: Smart Dual-Axis Solar Tracker',
+    team: ['Amina Mansouri', 'Yacine Belkacem'],
+    description: 'IoT-enabled dual-axis solar tracking system powered by real-time irradiance sensors and energy telemetry.',
+    tags: ['IoT', 'Solar', 'CleanTech', 'Hardware'],
+    imageUrls: ['https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&h=400&fit=crop'],
+    links: {
+      github: 'https://github.com/alpharobotics-usthb/solartrack-ai',
+      demo: 'https://solartrack.alpharobotics-usthb.dz',
+    },
+    status: 'pending',
+    submittedBy: 'demo_club_lead_uid',
+    submittedAt: '2026-09-05T15:00:00.000Z',
+  },
+  {
+    id: 'demo_pending_proj_2',
+    clubId: 'club_constantine',
+    clubName: 'Constantine AI Society',
+    university: 'University of Constantine 1 (Frères Mentouri)',
+    title: 'ArabNLP Dz: Algerian Dialect Sentiment Analyzer',
+    team: ['Tarik Bouzid', 'Farah Zerrouki'],
+    description: 'Fine-tuned multilingual transformer model specialized for Algerian Darija and Franco-Arab sentiment analysis.',
+    tags: ['NLP', 'AI', 'Python', 'Transformers', 'Open Data'],
+    imageUrls: ['https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=400&fit=crop'],
+    links: {
+      github: 'https://github.com/constantine-ai/arabnlp-dz',
+    },
+    status: 'pending',
+    submittedBy: 'demo_user_4',
+    submittedAt: '2026-09-05T16:30:00.000Z',
+  },
+];
+

@@ -31,6 +31,73 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
         }
 
+        <!-- ⚡ Quick 1-Click Demo Accounts -->
+        <div class="demo-section">
+          <div class="demo-section-header">
+            <span class="demo-badge">⚡ Instant Preview</span>
+            <span class="demo-title">Test Demo Accounts</span>
+          </div>
+          <p class="demo-desc">
+            Explore role-protected features instantly without passwords:
+          </p>
+          <div class="demo-buttons-stack">
+            <button
+              type="button"
+              class="btn-demo-account btn-demo-admin"
+              (click)="onDemoLogin('admin', '/admin')"
+              [disabled]="isLoading()"
+            >
+              <div class="demo-acc-icon">🛡️</div>
+              <div class="demo-acc-info">
+                <div class="demo-acc-header">
+                  <span class="demo-acc-role">Board Admin</span>
+                  <span class="demo-acc-tag tag-admin">Governance</span>
+                </div>
+                <div class="demo-acc-email">admin@nacs.dz</div>
+                <div class="demo-acc-route">Applications & Moderation Queue (/admin)</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              class="btn-demo-account btn-demo-lead"
+              (click)="onDemoLogin('club_lead', '/lead')"
+              [disabled]="isLoading()"
+            >
+              <div class="demo-acc-icon">🚀</div>
+              <div class="demo-acc-info">
+                <div class="demo-acc-header">
+                  <span class="demo-acc-role">Club Lead</span>
+                  <span class="demo-acc-tag tag-lead">Alpha Robotics</span>
+                </div>
+                <div class="demo-acc-email">lead@alpharobotics.dz</div>
+                <div class="demo-acc-route">Club Profile, Events & Projects (/lead)</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              class="btn-demo-account btn-demo-visitor"
+              (click)="onDemoLogin('visitor', '/clubs')"
+              [disabled]="isLoading()"
+            >
+              <div class="demo-acc-icon">🎓</div>
+              <div class="demo-acc-info">
+                <div class="demo-acc-header">
+                  <span class="demo-acc-role">Student Visitor</span>
+                  <span class="demo-acc-tag tag-visitor">Public</span>
+                </div>
+                <div class="demo-acc-email">student@usthb.dz</div>
+                <div class="demo-acc-route">Browse Directory, Calendar & Showcase (/clubs)</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="divider">
+          <span>or sign in with credentials</span>
+        </div>
+
         <!-- Primary Auth Method: Google Sign-In -->
         <button
           type="button"
@@ -38,7 +105,7 @@ import { AuthService } from '../../core/services/auth.service';
           (click)="onGoogleSignIn()"
           [disabled]="isLoading()"
         >
-          <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+          <svg class="google-icon" viewBox="24" width="20" height="20">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -60,7 +127,7 @@ import { AuthService } from '../../core/services/auth.service';
         </button>
 
         <div class="divider">
-          <span>or fallback with email</span>
+          <span>or with email</span>
         </div>
 
         <!-- Fallback Method: Email & Password -->
@@ -118,12 +185,12 @@ import { AuthService } from '../../core/services/auth.service';
       justify-content: center;
       align-items: center;
       min-height: 60vh;
-      padding: 1rem;
+      padding: 1.5rem 1rem;
     }
     .auth-card {
       width: 100%;
-      max-width: 440px;
-      padding: 2.5rem;
+      max-width: 480px;
+      padding: 2.25rem 2rem;
       background: var(--nacs-surface);
       border: 1px solid var(--nacs-border);
       border-radius: var(--radius-md);
@@ -131,15 +198,129 @@ import { AuthService } from '../../core/services/auth.service';
     }
     .brand-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
     .auth-logo {
       border-radius: var(--radius-xs);
       margin-bottom: 0.75rem;
     }
+
+    /* --- Demo Section Styles --- */
+    .demo-section {
+      background: rgba(13, 13, 255, 0.03);
+      border: 1px solid var(--nacs-border-strong);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .demo-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .demo-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: var(--nacs-primary-soft);
+      color: var(--nacs-primary);
+    }
+    .demo-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--nacs-text);
+    }
+    .demo-desc {
+      font-size: 0.78rem;
+      color: var(--nacs-text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .demo-buttons-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .btn-demo-account {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      background: var(--nacs-surface);
+      border: 1px solid var(--nacs-border);
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      color: var(--nacs-text);
+      transition: all 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--nacs-primary);
+        box-shadow: var(--elevation-1);
+        transform: translateY(-1px);
+      }
+    }
+    .demo-acc-icon {
+      font-size: 1.25rem;
+      line-height: 1.2;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .demo-acc-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .demo-acc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.15rem;
+    }
+    .demo-acc-role {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--nacs-text);
+    }
+    .demo-acc-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--radius-xs);
+      text-transform: uppercase;
+    }
+    .tag-admin {
+      background: rgba(217, 37, 80, 0.1);
+      color: var(--nacs-danger);
+    }
+    .tag-lead {
+      background: rgba(13, 13, 255, 0.1);
+      color: var(--nacs-primary);
+    }
+    .tag-visitor {
+      background: rgba(18, 140, 78, 0.1);
+      color: var(--nacs-success);
+    }
+    .demo-acc-email {
+      font-size: 0.75rem;
+      color: var(--nacs-text-muted);
+      font-family: monospace;
+    }
+    .demo-acc-route {
+      font-size: 0.72rem;
+      color: var(--nacs-primary);
+      margin-top: 0.2rem;
+    }
+
+    /* --- Standard Auth Styles --- */
     .btn-google {
       width: 100%;
-      background-color: #ffffff;
+      background-color: var(--nacs-surface);
       color: var(--nacs-text);
       border: 1px solid var(--nacs-border-strong);
       padding: 0.75rem 1rem;
@@ -162,7 +343,7 @@ import { AuthService } from '../../core/services/auth.service';
       display: flex;
       align-items: center;
       text-align: center;
-      margin: 1.5rem 0;
+      margin: 1.25rem 0;
       color: var(--nacs-text-muted);
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -194,7 +375,8 @@ import { AuthService } from '../../core/services/auth.service';
       border-radius: var(--radius-sm);
       font-size: 0.95rem;
       font-family: var(--font-body);
-      background-color: #ffffff;
+      background-color: var(--nacs-surface);
+      color: var(--nacs-text);
       transition: border-color 0.15s ease;
 
       &:focus {
@@ -255,6 +437,19 @@ export class LoginComponent {
     return this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
+  async onDemoLogin(role: 'admin' | 'board' | 'club_lead' | 'visitor', targetUrl: string): Promise<void> {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    try {
+      this.authService.loginAsDemo(role);
+      await this.router.navigateByUrl(targetUrl);
+    } catch (err: any) {
+      this.errorMessage.set(err.message || 'Failed to sign in with demo account.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
   async onGoogleSignIn(): Promise<void> {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -291,3 +486,4 @@ export class LoginComponent {
     }
   }
 }
+

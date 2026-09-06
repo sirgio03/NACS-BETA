@@ -16,8 +16,10 @@ import {
 } from '@angular/fire/firestore';
 import { Club, ClubLeader } from '../models/club.model';
 import { DEMO_CLUBS } from '../data/demo-data';
+import { findWilayaByInstitution } from '../data/algerian-universities.data';
 
 export interface ClubFilterOptions {
+  wilaya?: string;
   university?: string;
   category?: string;
   verifiedOnly?: boolean;
@@ -154,6 +156,19 @@ export class ClubService {
 
     if (options.verifiedOnly !== false) {
       filtered = filtered.filter((c) => c.verified);
+    }
+
+    if (options.wilaya && options.wilaya !== 'all') {
+      const wTarget = options.wilaya.toLowerCase();
+      filtered = filtered.filter((c) => {
+        const found = findWilayaByInstitution(c.university);
+        if (!found) return false;
+        return (
+          found.wilayaCode === options.wilaya ||
+          found.wilayaName.toLowerCase() === wTarget ||
+          `${found.wilayaCode} - ${found.wilayaName}`.toLowerCase() === wTarget
+        );
+      });
     }
 
     if (options.university && options.university !== 'all') {

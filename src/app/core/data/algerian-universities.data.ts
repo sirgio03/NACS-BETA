@@ -403,3 +403,18 @@ export function findWilayaByInstitution(institutionName: string): WilayaInstitut
     group.institutions.some((inst) => inst.toLowerCase().includes(target) || target.includes(inst.toLowerCase()))
   );
 }
+
+/**
+ * Get all institutions located within a specific wilaya code or label.
+ */
+export function getInstitutionsInWilaya(wilayaCodeOrName: string): string[] {
+  if (!wilayaCodeOrName || wilayaCodeOrName === 'all') return ALL_ALGERIAN_INSTITUTIONS;
+  const match = ALGERIAN_INSTITUTIONS_BY_WILAYA.find(
+    (w) =>
+      w.wilayaCode === wilayaCodeOrName ||
+      w.wilayaName.toLowerCase() === wilayaCodeOrName.toLowerCase() ||
+      `${w.wilayaCode} - ${w.wilayaName}`.toLowerCase() === wilayaCodeOrName.toLowerCase()
+  );
+  return match ? match.institutions : [];
+}
+

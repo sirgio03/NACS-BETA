@@ -59,7 +59,7 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
   font-size: 0.9rem;
-  background-color: #ffffff;
+  background-color: var(--nacs-surface);
   color: var(--nacs-text);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
@@ -70,9 +70,14 @@
   }
 }
 
+.wilaya-filter {
+  min-width: 200px;
+  flex: 1;
+}
+
 .university-filter {
   min-width: 260px;
-  flex: 1;
+  flex: 1.5;
 }
 
 .tag-pills {

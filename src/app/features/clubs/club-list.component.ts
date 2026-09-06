@@ -32,6 +32,7 @@ export class ClubListComponent implements OnInit {
   readonly totalInitialClubs = signal<number | null>(null);
 
   // --- Filter State ---
+  selectedWilaya = 'all';
   selectedUniversity = 'all';
   selectedCategory = 'all';
   verifiedOnly = true;
@@ -42,6 +43,16 @@ export class ClubListComponent implements OnInit {
 
   readonly institutionsByWilaya: WilayaInstitutions[] = ALGERIAN_INSTITUTIONS_BY_WILAYA;
   readonly universities: string[] = ALL_ALGERIAN_INSTITUTIONS;
+
+  get availableInstitutions(): string[] {
+    if (this.selectedWilaya === 'all') {
+      return this.universities;
+    }
+    const group = this.institutionsByWilaya.find(
+      (g) => g.wilayaCode === this.selectedWilaya || `${g.wilayaCode} - ${g.wilayaName}` === this.selectedWilaya
+    );
+    return group ? group.institutions : [];
+  }
 
   readonly categories = [
     { key: 'all', label: 'All Categories' },
@@ -61,6 +72,7 @@ export class ClubListComponent implements OnInit {
     this.lastDocCursor = null;
 
     const filter: ClubFilterOptions = {
+      wilaya: this.selectedWilaya,
       university: this.selectedUniversity,
       category: this.selectedCategory,
       verifiedOnly: this.verifiedOnly,
@@ -88,6 +100,7 @@ export class ClubListComponent implements OnInit {
 
     this.isLoadingMore.set(true);
     const filter: ClubFilterOptions = {
+      wilaya: this.selectedWilaya,
       university: this.selectedUniversity,
       category: this.selectedCategory,
       verifiedOnly: this.verifiedOnly,
@@ -106,11 +119,17 @@ export class ClubListComponent implements OnInit {
     }
   }
 
+  onWilayaChange(): void {
+    this.selectedUniversity = 'all';
+    this.loadInitialClubs();
+  }
+
   onFilterChange(): void {
     this.loadInitialClubs();
   }
 
   resetFilters(): void {
+    this.selectedWilaya = 'all';
     this.selectedUniversity = 'all';
     this.selectedCategory = 'all';
     this.verifiedOnly = true;
@@ -120,6 +139,7 @@ export class ClubListComponent implements OnInit {
 
   isFilterDefault(): boolean {
     return (
+      this.selectedWilaya === 'all' &&
       this.selectedUniversity === 'all' &&
       this.selectedCategory === 'all' &&
       this.verifiedOnly === true &&

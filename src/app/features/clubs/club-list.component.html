@@ -32,6 +32,22 @@
         </div>
       </div>
 
+      <!-- Wilaya Filter -->
+      <div class="wilaya-filter">
+        <label for="wilaya-select" class="visually-hidden">Filter by Wilaya</label>
+        <select
+          id="wilaya-select"
+          [(ngModel)]="selectedWilaya"
+          (change)="onWilayaChange()"
+          class="form-select"
+        >
+          <option value="all">&#127963;&#65039; All Wilayas (National)</option>
+          @for (group of institutionsByWilaya; track group.wilayaCode) {
+            <option [value]="group.wilayaCode">{{ group.wilayaCode }} - {{ group.wilayaName }}</option>
+          }
+        </select>
+      </div>
+
       <!-- University Filter -->
       <div class="university-filter">
         <label for="univ-select" class="visually-hidden">Filter by University</label>
@@ -41,13 +57,21 @@
           (change)="onFilterChange()"
           class="form-select"
         >
-          <option value="all">All Algerian Universities (48 Wilayas)</option>
-          @for (group of institutionsByWilaya; track group.wilayaCode) {
-            <optgroup [label]="group.wilayaCode + ' - ' + group.wilayaName">
-              @for (univ of group.institutions; track univ) {
-                <option [value]="univ">{{ univ }}</option>
-              }
-            </optgroup>
+          <option value="all">
+            {{ selectedWilaya === 'all' ? 'All Universities (48 Wilayas)' : 'All Institutions in this Wilaya' }}
+          </option>
+          @if (selectedWilaya === 'all') {
+            @for (group of institutionsByWilaya; track group.wilayaCode) {
+              <optgroup [label]="group.wilayaCode + ' - ' + group.wilayaName">
+                @for (univ of group.institutions; track univ) {
+                  <option [value]="univ">{{ univ }}</option>
+                }
+              </optgroup>
+            }
+          } @else {
+            @for (univ of availableInstitutions; track univ) {
+              <option [value]="univ">{{ univ }}</option>
+            }
           }
         </select>
       </div>

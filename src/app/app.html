@@ -43,6 +43,21 @@
             Admin Portal
           </a>
         }
+        <!-- Dark / Light Mode Switcher -->
+        <button
+          type="button"
+          class="btn-theme-toggle"
+          (click)="themeService.toggleTheme()"
+          [attr.aria-label]="themeService.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          [title]="themeService.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        >
+          @if (themeService.isDark()) {
+            <span aria-hidden="true">&#9728;&#65039;</span>
+          } @else {
+            <span aria-hidden="true">&#127769;</span>
+          }
+        </button>
+
         @if (authService.isAuthenticated()) {
           <div class="user-session">
             <span class="user-name">

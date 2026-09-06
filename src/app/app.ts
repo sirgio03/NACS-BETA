@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink } from '@angular/router';
 import { UpperCasePipe } from '@angular/common';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ import { AuthService } from './core/services/auth.service';
 })
 export class App {
   readonly authService = inject(AuthService);
+  readonly themeService = inject(ThemeService);
   readonly title = signal('National Association of Campus Societies');
   readonly currentEnv = signal(environment.environmentName);
   readonly isProd = signal(environment.production);

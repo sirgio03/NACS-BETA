@@ -29,6 +29,7 @@ export class ShowcaseGalleryComponent implements OnInit {
   readonly selectedProject = signal<StudentProject | null>(null);
 
   // --- Filter State ---
+  selectedWilaya = 'all';
   selectedTag = 'all';
   selectedUniversity = 'all';
   searchTerm = '';
@@ -51,6 +52,16 @@ export class ShowcaseGalleryComponent implements OnInit {
   readonly institutionsByWilaya: WilayaInstitutions[] = ALGERIAN_INSTITUTIONS_BY_WILAYA;
   readonly universities: string[] = ALL_ALGERIAN_INSTITUTIONS;
 
+  get availableInstitutions(): string[] {
+    if (this.selectedWilaya === 'all') {
+      return this.universities;
+    }
+    const group = this.institutionsByWilaya.find(
+      (g) => g.wilayaCode === this.selectedWilaya || `${g.wilayaCode} - ${g.wilayaName}` === this.selectedWilaya
+    );
+    return group ? group.institutions : [];
+  }
+
   ngOnInit(): void {
     this.loadInitialProjects();
   }
@@ -60,6 +71,7 @@ export class ShowcaseGalleryComponent implements OnInit {
     this.lastDocCursor = null;
 
     const filter: ProjectFilterOptions = {
+      wilaya: this.selectedWilaya,
       tag: this.selectedTag,
       university: this.selectedUniversity,
       searchTerm: this.searchTerm,
@@ -71,7 +83,7 @@ export class ShowcaseGalleryComponent implements OnInit {
       this.lastDocCursor = result.lastDoc;
       this.hasMore.set(result.hasMore);
     } catch (err) {
-      console.error('[ShowcaseGallery] Error fetching approved projects:', err);
+      console.error('[ShowcaseGallery] Error fetching projects:', err);
     } finally {
       this.isLoading.set(false);
     }
@@ -82,6 +94,7 @@ export class ShowcaseGalleryComponent implements OnInit {
 
     this.isLoadingMore.set(true);
     const filter: ProjectFilterOptions = {
+      wilaya: this.selectedWilaya,
       tag: this.selectedTag,
       university: this.selectedUniversity,
       searchTerm: this.searchTerm,
@@ -99,6 +112,11 @@ export class ShowcaseGalleryComponent implements OnInit {
     }
   }
 
+  onWilayaChange(): void {
+    this.selectedUniversity = 'all';
+    this.loadInitialProjects();
+  }
+
   onFilterChange(): void {
     this.loadInitialProjects();
   }
@@ -109,6 +127,7 @@ export class ShowcaseGalleryComponent implements OnInit {
   }
 
   resetFilters(): void {
+    this.selectedWilaya = 'all';
     this.selectedTag = 'all';
     this.selectedUniversity = 'all';
     this.searchTerm = '';
