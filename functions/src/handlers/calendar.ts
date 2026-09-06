@@ -139,53 +139,64 @@ export function wrapVCalendar(vevents: string[]): string {
 /**
  * Callable Cloud Function: exportEventIcs
  * Exports a single event in RFC 5545 iCalendar (.ics) format.
+ * Enforces Firebase App Check to prevent bot abuse and unauthorized scraping.
  * Invariant: Strictly rejects requests for events where status !== 'approved'.
  */
-export const exportEventIcs = onCall<ExportEventIcsPayload>(async (request) => {
-  const { eventId } = request.data || {};
-  if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
-    throw new HttpsError('invalid-argument', 'Missing or invalid eventId parameter.');
+export const exportEventIcs = onCall<ExportEventIcsPayload>(
+  {
+    enforceAppCheck: true,
+  },
+  async (request) => {
+    const { eventId } = request.data || {};
+    if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
+      throw new HttpsError('invalid-argument', 'Missing or invalid eventId parameter.');
+    }
+
+    const cleanEventId = eventId.trim();
+    const db = admin.firestore();
+    const eventDoc = await db.collection('events').doc(cleanEventId).get();
+
+    if (!eventDoc.exists) {
+      throw new HttpsError('not-found', `Event with ID "${cleanEventId}" was not found.`);
+    }
+
+    const eventData = eventDoc.data();
+    if (!eventData) {
+      throw new HttpsError('internal', 'Unable to retrieve event record.');
+    }
+
+    // Security Invariant: Only approved events may be exported
+    if (eventData.status !== 'approved') {
+      throw new HttpsError(
+        'failed-precondition',
+        `Cannot export unapproved event. Current status is '${eventData.status}'.`
+      );
+    }
+
+    const vevent = buildVEvent(cleanEventId, eventData);
+    const icsContent = wrapVCalendar([vevent]);
+    const filename = `${slugify(eventData.title || cleanEventId)}.ics`;
+
+    return {
+      success: true,
+      eventId: cleanEventId,
+      filename,
+      icsContent,
+    };
   }
-
-  const cleanEventId = eventId.trim();
-  const db = admin.firestore();
-  const eventDoc = await db.collection('events').doc(cleanEventId).get();
-
-  if (!eventDoc.exists) {
-    throw new HttpsError('not-found', `Event with ID "${cleanEventId}" was not found.`);
-  }
-
-  const eventData = eventDoc.data();
-  if (!eventData) {
-    throw new HttpsError('internal', 'Unable to retrieve event record.');
-  }
-
-  // Security Invariant: Only approved events may be exported
-  if (eventData.status !== 'approved') {
-    throw new HttpsError(
-      'failed-precondition',
-      `Cannot export unapproved event. Current status is '${eventData.status}'.`
-    );
-  }
-
-  const vevent = buildVEvent(cleanEventId, eventData);
-  const icsContent = wrapVCalendar([vevent]);
-  const filename = `${slugify(eventData.title || cleanEventId)}.ics`;
-
-  return {
-    success: true,
-    eventId: cleanEventId,
-    filename,
-    icsContent,
-  };
-});
+);
 
 /**
  * Callable Cloud Function: exportEventsIcs
  * Exports multiple approved events (e.g. filtered calendar view) as a single .ics calendar.
+ * Enforces Firebase App Check to prevent bot abuse and scraping.
  * Invariant: Silently discards or rejects unapproved events, exporting only confirmed approved items.
  */
-export const exportEventsIcs = onCall<ExportEventsIcsPayload>(async (request) => {
+export const exportEventsIcs = onCall<ExportEventsIcsPayload>(
+  {
+    enforceAppCheck: true,
+  },
+  async (request) => {
   const { eventIds } = request.data || {};
   if (!Array.isArray(eventIds) || eventIds.length === 0) {
     throw new HttpsError('invalid-argument', 'Missing or invalid eventIds parameter; array of IDs is required.');
