@@ -264,7 +264,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #eceef5 25%, #f7f7fc 50%, #eceef5 75%);
+  background: linear-gradient(90deg, var(--nacs-surface-alt) 25%, var(--nacs-border) 50%, var(--nacs-surface-alt) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-xs);

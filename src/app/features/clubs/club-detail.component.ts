@@ -451,9 +451,9 @@ import { StudentProject } from '../../core/models/project.model';
       color: var(--nacs-text-muted);
     }
     .badge-conflict {
-      background-color: #fffbeb;
-      color: #92400e;
-      border: 1px solid #fcd34d;
+      background-color: var(--nacs-pending-soft);
+      color: var(--nacs-pending);
+      border: 1px solid rgba(224, 163, 10, 0.35);
       font-size: 0.75rem;
       font-weight: 600;
       padding: 0.15rem 0.45rem;
@@ -701,7 +701,7 @@ import { StudentProject } from '../../core/models/project.model';
       margin-bottom: 0.75rem;
     }
     .skeleton {
-      background: linear-gradient(90deg, #eceef5 25%, #f7f7fc 50%, #eceef5 75%);
+      background: linear-gradient(90deg, var(--nacs-surface-alt) 25%, var(--nacs-border) 50%, var(--nacs-surface-alt) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: var(--radius-xs);

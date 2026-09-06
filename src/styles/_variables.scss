@@ -61,6 +61,7 @@ $elevation-interactive: 0 2px 6px rgba(13, 13, 255, 0.12);
   --nacs-bg: #{$nacs-bg};
   --nacs-surface: #{$nacs-surface};
   --nacs-surface-alt: #{$nacs-surface-alt};
+  --nacs-neutral-light: #f7f7fc;
   --nacs-border: #{$nacs-border};
   --nacs-border-strong: #{$nacs-border-strong};
 
@@ -87,28 +88,51 @@ $elevation-interactive: 0 2px 6px rgba(13, 13, 255, 0.12);
   --elevation-1: #{$elevation-1};
   --elevation-2: #{$elevation-2};
   --elevation-interactive: #{$elevation-interactive};
+
+  // Compatibility aliases for legacy variable names
+  --color-bg: var(--nacs-bg);
+  --color-surface: var(--nacs-surface);
+  --color-surface-alt: var(--nacs-surface-alt);
+  --color-border: var(--nacs-border);
+  --color-primary: var(--nacs-primary);
+  --color-text: var(--nacs-text);
+  --color-text-muted: var(--nacs-text-muted);
+  --color-danger: var(--nacs-danger);
+  --color-success: var(--nacs-success);
+  --color-pending: var(--nacs-pending);
 }
 
-// --- Dark Theme Tokens ---
+// --- Dark Theme Tokens (WCAG AA Compliant Contrast) ---
 [data-theme="dark"] {
   --nacs-bg: #0c0e17;
   --nacs-surface: #141726;
-  --nacs-surface-alt: #1a1e32;
-  --nacs-border: #242942;
-  --nacs-border-strong: #373e61;
+  --nacs-surface-alt: #1c2035;
+  --nacs-neutral-light: #181c30;
+  --nacs-border: #272d47;
+  --nacs-border-strong: #3d466e;
 
-  --nacs-text: #f0f2ff;
-  --nacs-text-muted: #9aa1c2;
+  --nacs-primary: #707eff;
+  --nacs-primary-dark: #5865f2;
+  --nacs-primary-light: #9aa5ff;
+  --nacs-primary-soft: rgba(112, 126, 255, 0.18);
+
+  --nacs-accent: #ffd400;
+  --nacs-accent-hover: #ffe033;
+  --nacs-accent-soft: rgba(255, 212, 0, 0.16);
+
+  --nacs-text: #f3f4fd;
+  --nacs-text-muted: #a3abc8;
   --nacs-text-inverted: #0c0e17;
 
-  --nacs-primary-soft: rgba(61, 61, 255, 0.22);
-  --nacs-accent-soft: rgba(255, 212, 0, 0.15);
+  --nacs-success: #34d399;
+  --nacs-success-soft: rgba(52, 211, 153, 0.18);
+  --nacs-pending: #fbbf24;
+  --nacs-pending-soft: rgba(251, 191, 36, 0.18);
+  --nacs-danger: #f87171;
+  --nacs-danger-soft: rgba(248, 113, 113, 0.18);
 
-  --nacs-success-soft: rgba(31, 168, 100, 0.2);
-  --nacs-pending-soft: rgba(224, 163, 10, 0.2);
-  --nacs-danger-soft: rgba(217, 37, 80, 0.2);
-
-  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.55);
-  --elevation-interactive: 0 4px 12px rgba(61, 61, 255, 0.35);
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --elevation-2: 0 3px 8px rgba(0, 0, 0, 0.65);
+  --elevation-interactive: 0 4px 14px rgba(112, 126, 255, 0.35);
 }
+

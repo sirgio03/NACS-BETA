@@ -90,7 +90,7 @@ a {
 }
 
 .btn-outline {
-  background-color: #ffffff;
+  background-color: var(--nacs-surface);
   color: var(--nacs-primary);
   border-color: var(--nacs-border-strong);
 
@@ -99,6 +99,18 @@ a {
     border-color: var(--nacs-primary);
     text-decoration: none;
   }
+}
+
+// Global Dark Mode compatibility for Form Elements
+input, select, textarea {
+  font-family: var(--font-body);
+  color: var(--nacs-text);
+  background-color: var(--nacs-surface);
+}
+
+select option {
+  background-color: var(--nacs-surface);
+  color: var(--nacs-text);
 }
 
 // --- Badges & Status Chips ---
@@ -141,6 +153,7 @@ a {
 // --- Cards & Surfaces ---
 .card {
   background-color: var(--nacs-surface);
+  color: var(--nacs-text);
   border: 1px solid var(--nacs-border);
   border-radius: var(--radius-md);
   box-shadow: var(--elevation-1);
