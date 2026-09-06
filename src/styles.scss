@@ -14,6 +14,8 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow-x: hidden; // Strict anti-pattern rule: prevent horizontal page scrolling
+  width: 100%;
 }
 
 body {
@@ -22,6 +24,12 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+// Mobile Form Controls: Minimum 16px font size to prevent iOS Safari viewport auto-zoom
+input, select, textarea {
+  font-size: 16px;
+  font-family: var(--font-body);
 }
 
 a {
@@ -36,7 +44,7 @@ a {
   }
 }
 
-// --- Institutional Buttons (Sharp 4-6px corners, 1-2px elevation) ---
+// --- Institutional Buttons (Sharp 4-6px corners, 48px mobile touch targets) ---
 .btn {
   display: inline-flex;
   align-items: center;
@@ -44,15 +52,17 @@ a {
   gap: 0.5rem;
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   line-height: 1;
-  padding: 0.65rem 1.25rem;
+  min-height: 48px; // Complies with 48px touch-target mobile accessibility standards
+  padding: 0.75rem 1.25rem;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
   box-shadow: var(--elevation-1);
   text-decoration: none;
+  box-sizing: border-box;
 
   &:disabled {
     opacity: 0.6;

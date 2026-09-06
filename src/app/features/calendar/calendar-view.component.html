@@ -31,26 +31,28 @@
       <div class="nav-button-group">
         <button
           type="button"
-          class="btn btn-outline btn-sm"
+          class="btn btn-outline btn-nav btn-nav-prev"
           (click)="previous()"
           aria-label="Période précédente"
         >
-          &larr; Précédent
+          <span class="chevron-arrow" aria-hidden="true">&larr;</span>
+          <span class="nav-btn-text">Précédent</span>
         </button>
         <button
           type="button"
-          class="btn btn-outline btn-sm"
+          class="btn btn-outline btn-nav btn-nav-today"
           (click)="today()"
         >
           Aujourd'hui
         </button>
         <button
           type="button"
-          class="btn btn-outline btn-sm"
+          class="btn btn-outline btn-nav btn-nav-next"
           (click)="next()"
           aria-label="Période suivante"
         >
-          Suivant &rarr;
+          <span class="nav-btn-text">Suivant</span>
+          <span class="chevron-arrow" aria-hidden="true">&rarr;</span>
         </button>
       </div>
 
@@ -58,7 +60,7 @@
     </div>
 
     <div class="toolbar-actions">
-      <!-- View Mode Selector -->
+      <!-- Desktop View Mode Selector (Hidden on mobile < 768px) -->
       <div class="view-mode-toggle" role="group" aria-label="Mode d'affichage">
         <button
           type="button"
@@ -86,11 +88,16 @@
         </button>
       </div>
 
+      <!-- Mobile Mode Indicator Tag -->
+      <div class="mobile-agenda-tag">
+        <span class="badge badge-accent">Mode Agenda Mobile</span>
+      </div>
+
       <!-- Batch Export Button -->
       @if (filteredEvents().length > 0) {
         <button
           type="button"
-          class="btn btn-primary btn-sm btn-export-all"
+          class="btn btn-primary btn-export-all"
           (click)="downloadAllVisibleIcs()"
           [disabled]="isExportingIcs()"
         >
@@ -172,205 +179,282 @@
     }
   </div>
 
-  <!-- Main View: MONTH GRID -->
-  @if (viewMode() === 'month') {
-    <div class="month-calendar-grid card">
-      <!-- Weekday Headers -->
-      <div class="grid-header-row">
-        @for (dayName of dayNamesShort; track dayName) {
-          <div class="grid-header-cell">{{ dayName }}</div>
-        }
-      </div>
+  <!-- Desktop Calendar Views: Rendered on >= 768px -->
+  <div class="desktop-calendar-views">
+    <!-- Main View: MONTH GRID -->
+    @if (viewMode() === 'month') {
+      <div class="month-calendar-grid card">
+        <!-- Weekday Headers -->
+        <div class="grid-header-row">
+          @for (dayName of dayNamesShort; track dayName) {
+            <div class="grid-header-cell">{{ dayName }}</div>
+          }
+        </div>
 
-      <!-- Month Day Cells -->
-      <div class="grid-days-container">
-        @for (day of monthDays(); track day.dateString) {
-          <div
-            class="day-cell"
-            [class.outside-month]="!day.isCurrentMonth"
-            [class.is-today]="day.isToday"
-            [class.has-events]="day.events.length > 0"
-          >
-            <div class="day-cell-top">
-              <span class="day-number">{{ day.dayNumber }}</span>
-              @if (day.events.length > 0) {
-                <span class="day-event-count" [title]="day.events.length + ' événement(s)'">
-                  {{ day.events.length }}
-                </span>
-              }
-            </div>
+        <!-- Month Day Cells -->
+        <div class="grid-days-container">
+          @for (day of monthDays(); track day.dateString) {
+            <div
+              class="day-cell"
+              [class.outside-month]="!day.isCurrentMonth"
+              [class.is-today]="day.isToday"
+              [class.has-events]="day.events.length > 0"
+            >
+              <div class="day-cell-top">
+                <span class="day-number">{{ day.dayNumber }}</span>
+                @if (day.events.length > 0) {
+                  <span class="day-event-count" [title]="day.events.length + ' événement(s)'">
+                    {{ day.events.length }}
+                  </span>
+                }
+              </div>
 
-            <div class="day-events-list">
-              @for (event of day.events; track event.id) {
-                <div
-                  class="event-pill"
-                  [class.event-conflict]="hasConflict(event)"
-                  (click)="openEventModal(event)"
-                  [title]="event.title + (hasConflict(event) ? ' (Proximité calendrier)' : '')"
-                >
-                  <span class="event-pill-time">{{ formatTime(event.date) }}</span>
-                  <span class="event-pill-title">{{ event.title }}</span>
-                  @if (hasConflict(event)) {
-                    <span
-                      class="conflict-dot"
-                      title="Chevauchement potentiel de calendrier avec un autre événement national"
-                    >
-                      ⚠
-                    </span>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
-  <!-- Main View: WEEK VIEW -->
-  @if (viewMode() === 'week') {
-    <div class="week-calendar-grid card">
-      <div class="week-grid-row">
-        @for (day of weekDays(); track day.dateString) {
-          <div
-            class="week-column"
-            [class.is-today]="day.isToday"
-          >
-            <div class="week-col-header">
-              <span class="col-day-name">{{ day.dayName }}</span>
-              <span class="col-day-number">{{ day.dayNumber }}</span>
-            </div>
-
-            <div class="week-events-container">
-              @if (day.events.length === 0) {
-                <div class="no-events-col">Aucun événement</div>
-              } @else {
+              <div class="day-events-list">
                 @for (event of day.events; track event.id) {
                   <div
-                    class="week-event-card"
-                    [class.card-has-conflict]="hasConflict(event)"
+                    class="event-pill"
+                    [class.event-conflict]="hasConflict(event)"
                     (click)="openEventModal(event)"
+                    [title]="event.title + (hasConflict(event) ? ' (Proximité calendrier)' : '')"
                   >
-                    <div class="card-badges-row">
-                      <span class="badge badge-accent badge-xs">{{ event.type }}</span>
-                      @if (hasConflict(event)) {
-                        <span
-                          class="badge badge-pending badge-xs"
-                          title="Chevauchement potentiel de calendrier avec un autre événement national"
-                        >
-                          ⚠ Clustered
-                        </span>
-                      }
-                    </div>
-                    <h4 class="week-event-title">{{ event.title }}</h4>
-                    <p class="week-event-club">{{ event.clubName }}</p>
-                    <p class="week-event-time">🕒 {{ formatTime(event.date) }}</p>
-                    @if (event.wilaya) {
-                      <p class="week-event-location">📍 {{ event.wilaya }}</p>
+                    <span class="event-pill-time">{{ formatTime(event.date) }}</span>
+                    <span class="event-pill-title">{{ event.title }}</span>
+                    @if (hasConflict(event)) {
+                      <span
+                        class="conflict-dot"
+                        title="Chevauchement potentiel de calendrier avec un autre événement national"
+                      >
+                        ⚠
+                      </span>
                     }
                   </div>
                 }
-              }
+              </div>
             </div>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
-  <!-- Main View: AGENDA / LIST VIEW -->
-  @if (viewMode() === 'agenda') {
-    <div class="agenda-view-container">
-      @if (agendaGroups().length === 0 && !isLoading()) {
-        <div class="empty-state card">
-          <div class="empty-icon">📅</div>
-          <h3 class="empty-title">Aucun événement trouvé</h3>
-          <p class="empty-desc">
-            Aucun événement approuvé ne correspond à la période ou aux critères de filtrage sélectionnés.
-          </p>
-          <button
-            type="button"
-            class="btn btn-outline btn-sm"
-            (click)="resetFilters()"
-          >
-            Réinitialiser les filtres
-          </button>
+          }
         </div>
-      } @else {
-        @for (group of agendaGroups(); track group.dateString) {
-          <div class="agenda-group">
-            <h3 class="agenda-date-heading">
-              {{ group.displayDate | titlecase }}
-            </h3>
+      </div>
+    }
 
-            <div class="agenda-cards-list">
-              @for (event of group.events; track event.id) {
-                <div
-                  class="agenda-card card card-interactive"
-                  (click)="openEventModal(event)"
-                >
-                  <div class="agenda-card-header">
-                    <div class="badges-group">
-                      <span class="badge badge-accent">{{ event.type }}</span>
-                      <span class="badge badge-approved">Approuvé</span>
-                      @if (hasConflict(event)) {
-                        <span
-                          class="badge badge-pending"
-                          title="Chevauchement de calendrier potentiel avec un autre événement national"
-                        >
-                          ⚠ Proximité Calendrier
-                        </span>
+    <!-- Main View: WEEK VIEW -->
+    @if (viewMode() === 'week') {
+      <div class="week-calendar-grid card">
+        <div class="week-grid-row">
+          @for (day of weekDays(); track day.dateString) {
+            <div
+              class="week-column"
+              [class.is-today]="day.isToday"
+            >
+              <div class="week-col-header">
+                <span class="col-day-name">{{ day.dayName }}</span>
+                <span class="col-day-number">{{ day.dayNumber }}</span>
+              </div>
+
+              <div class="week-events-container">
+                @if (day.events.length === 0) {
+                  <div class="no-events-col">Aucun événement</div>
+                } @else {
+                  @for (event of day.events; track event.id) {
+                    <div
+                      class="week-event-card"
+                      [class.card-has-conflict]="hasConflict(event)"
+                      (click)="openEventModal(event)"
+                    >
+                      <div class="card-badges-row">
+                        <span class="badge badge-accent badge-xs">{{ event.type }}</span>
+                        @if (hasConflict(event)) {
+                          <span
+                            class="badge badge-pending badge-xs"
+                            title="Chevauchement potentiel de calendrier avec un autre événement national"
+                          >
+                            ⚠ Clustered
+                          </span>
+                        }
+                      </div>
+                      <h4 class="week-event-title">{{ event.title }}</h4>
+                      <p class="week-event-club">{{ event.clubName }}</p>
+                      <p class="week-event-time">🕒 {{ formatTime(event.date) }}</p>
+                      @if (event.wilaya) {
+                        <p class="week-event-location">📍 {{ event.wilaya }}</p>
                       }
                     </div>
-                    <span class="agenda-time-pill">
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Main View: AGENDA / LIST VIEW -->
+    @if (viewMode() === 'agenda') {
+      <div class="agenda-view-container">
+        @if (agendaGroups().length === 0 && !isLoading()) {
+          <div class="empty-state card">
+            <div class="empty-icon">📅</div>
+            <h3 class="empty-title">Aucun événement trouvé</h3>
+            <p class="empty-desc">
+              Aucun événement approuvé ne correspond à la période ou aux critères de filtrage sélectionnés.
+            </p>
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              (click)="resetFilters()"
+            >
+              Réinitialiser les filtres
+            </button>
+          </div>
+        } @else {
+          @for (group of agendaGroups(); track group.dateString) {
+            <div class="agenda-group">
+              <h3 class="agenda-date-heading">
+                {{ group.displayDate | titlecase }}
+              </h3>
+
+              <div class="agenda-cards-list">
+                @for (event of group.events; track event.id) {
+                  <div
+                    class="agenda-card card card-interactive"
+                    (click)="openEventModal(event)"
+                  >
+                    <div class="agenda-card-header">
+                      <div class="badges-group">
+                        <span class="badge badge-accent">{{ event.type }}</span>
+                        <span class="badge badge-approved">Approuvé</span>
+                        @if (hasConflict(event)) {
+                          <span
+                            class="badge badge-pending"
+                            title="Chevauchement de calendrier potentiel avec un autre événement national"
+                          >
+                            ⚠ Proximité Calendrier
+                          </span>
+                        }
+                      </div>
+                      <span class="agenda-time-pill">
+                        🕒 {{ formatTime(event.date) }}
+                      </span>
+                    </div>
+
+                    <h3 class="agenda-event-title">{{ event.title }}</h3>
+                    <div class="agenda-event-meta">
+                      <span class="meta-club">🏛 {{ event.clubName || 'Club Universitaire' }}</span>
+                      <span class="meta-location">📍 {{ event.location }} ({{ event.wilaya }})</span>
+                    </div>
+
+                    <p class="agenda-event-desc">{{ event.description }}</p>
+
+                    <div class="agenda-card-footer" (click)="$event.stopPropagation()">
+                      <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="downloadEventIcs(event)"
+                        [disabled]="isExportingIcs()"
+                      >
+                        Ajouter au calendrier (.ics)
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- Empty State for Month & Week Views -->
+    @if (viewMode() !== 'agenda' && filteredEvents().length === 0 && !isLoading()) {
+      <div class="empty-state card">
+        <div class="empty-icon">📅</div>
+        <h3 class="empty-title">Aucun événement programmé</h3>
+        <p class="empty-desc">
+          Aucun événement approuvé ne correspond à la période sélectionnée ou aux filtres actifs.
+        </p>
+        <button
+          type="button"
+          class="btn btn-outline btn-sm"
+          (click)="resetFilters()"
+        >
+          Réinitialiser les filtres
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Mobile Calendar View: Strictly rendered on < 768px viewports (Hides 7-col desktop grids completely) -->
+  <div class="mobile-calendar-view" aria-label="Vue Agenda Mobile des Événements">
+    @if (agendaGroups().length === 0 && !isLoading()) {
+      <div class="empty-state card">
+        <div class="empty-icon">📅</div>
+        <h3 class="empty-title">Aucun événement ce mois-ci</h3>
+        <p class="empty-desc">
+          Aucun événement approuvé ne correspond à la période sélectionnée ou aux filtres actifs.
+        </p>
+        <button
+          type="button"
+          class="btn btn-outline mobile-btn-reset"
+          (click)="resetFilters()"
+        >
+          Réinitialiser les filtres
+        </button>
+      </div>
+    } @else {
+      <div class="mobile-agenda-list">
+        @for (group of agendaGroups(); track group.dateString) {
+          <div class="mobile-date-group">
+            <div class="mobile-date-header">
+              <span class="mobile-date-label">{{ group.displayDate | titlecase }}</span>
+              <span class="badge badge-accent badge-xs">{{ group.events.length }}</span>
+            </div>
+
+            <div class="mobile-events-stack">
+              @for (event of group.events; track event.id) {
+                <article
+                  class="mobile-event-card card card-interactive"
+                  (click)="openEventModal(event)"
+                >
+                  <div class="mobile-card-header">
+                    <div class="mobile-badges-row">
+                      <span class="badge badge-accent">{{ event.type | uppercase }}</span>
+                      @if (hasConflict(event)) {
+                        <span class="badge badge-pending">⚠ Clustered</span>
+                      }
+                    </div>
+                    <span class="mobile-time-badge">
                       🕒 {{ formatTime(event.date) }}
                     </span>
                   </div>
 
-                  <h3 class="agenda-event-title">{{ event.title }}</h3>
-                  <div class="agenda-event-meta">
-                    <span class="meta-club">🏛 {{ event.clubName || 'Club Universitaire' }}</span>
-                    <span class="meta-location">📍 {{ event.location }} ({{ event.wilaya }})</span>
+                  <h3 class="mobile-card-title">{{ event.title }}</h3>
+
+                  <div class="mobile-card-meta">
+                    <span class="mobile-meta-club">🏛️ {{ event.clubName }}</span>
+                    @if (event.wilaya) {
+                      <span class="mobile-meta-location">📍 {{ event.wilaya }}</span>
+                    }
                   </div>
 
-                  <p class="agenda-event-desc">{{ event.description }}</p>
+                  <p class="mobile-card-desc">{{ event.description }}</p>
 
-                  <div class="agenda-card-footer" (click)="$event.stopPropagation()">
+                  <div class="mobile-card-footer" (click)="$event.stopPropagation()">
                     <button
                       type="button"
-                      class="btn btn-outline btn-sm"
+                      class="btn btn-outline mobile-ics-btn"
                       (click)="downloadEventIcs(event)"
                       [disabled]="isExportingIcs()"
                     >
                       Ajouter au calendrier (.ics)
                     </button>
                   </div>
-                </div>
+                </article>
               }
             </div>
           </div>
         }
-      }
-    </div>
-  }
-
-  <!-- Empty State for Month & Week Views -->
-  @if (viewMode() !== 'agenda' && filteredEvents().length === 0 && !isLoading()) {
-    <div class="empty-state card">
-      <div class="empty-icon">📅</div>
-      <h3 class="empty-title">Aucun événement programmé</h3>
-      <p class="empty-desc">
-        Aucun événement approuvé ne correspond à la période sélectionnée ou aux filtres actifs.
-      </p>
-      <button
-        type="button"
-        class="btn btn-outline btn-sm"
-        (click)="resetFilters()"
-      >
-        Réinitialiser les filtres
-      </button>
-    </div>
-  }
+      </div>
+    }
+  </div>
 
   <!-- Event Detail Inspection Modal -->
   @if (selectedEvent(); as event) {

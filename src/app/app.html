@@ -8,7 +8,7 @@
 
   <header class="nacs-header" role="banner">
     <div class="header-container">
-      <a routerLink="/" class="brand-group" aria-label="NACS Homepage">
+      <a routerLink="/" class="brand-group" (click)="closeMobileMenu()" aria-label="NACS Homepage">
         <img
           src="assets/brand/nacs-mark-square.png"
           alt="NACS Sunburst Emblem"
@@ -23,30 +23,9 @@
         </div>
       </a>
 
-      <nav class="header-nav" aria-label="Federation Navigation">
-        <a routerLink="/" class="header-link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          Home
-        </a>
-        <a routerLink="/clubs" class="header-link" routerLinkActive="active">
-          Directory
-        </a>
-        <a routerLink="/showcase" class="header-link" routerLinkActive="active">
-          Showcase
-        </a>
-        <a routerLink="/calendar" class="header-link" routerLinkActive="active">
-          Calendar
-        </a>
-        @if (authService.isClubLead()) {
-          <a routerLink="/lead" class="header-link" routerLinkActive="active">
-            Lead Workspace
-          </a>
-        }
-        @if (authService.isBoardOrAdmin()) {
-          <a routerLink="/admin" class="header-link" routerLinkActive="active">
-            Admin Portal
-          </a>
-        }
-        <!-- Dark / Light Mode Switcher -->
+      <!-- Header Controls: Theme Toggle, Hamburger Button & Desktop Navigation -->
+      <div class="header-controls">
+        <!-- Dark / Light Mode Switcher (ALWAYS VISIBLE on all viewports) -->
         <button
           type="button"
           class="btn-theme-toggle"
@@ -61,37 +40,180 @@
           }
         </button>
 
-        @if (authService.isAuthenticated()) {
-          <div class="user-session">
-            <span class="user-name">
-              {{ authService.userProfile()?.displayName || authService.currentUser()?.email }}
-            </span>
-            <span
-              class="badge"
-              [class.badge-approved]="authService.isAdmin() || authService.isBoard()"
-              [class.badge-pending]="authService.isClubLead()"
-              [class.badge-accent]="authService.userRole() === 'visitor'"
+        <!-- Touch-Friendly Hamburger Menu Button (Visible on < 768px) -->
+        <button
+          type="button"
+          class="btn-hamburger"
+          (click)="toggleMobileMenu()"
+          [attr.aria-expanded]="mobileMenuOpen()"
+          aria-controls="mobile-nav-sheet"
+          aria-label="Toggle navigation menu"
+        >
+          <span class="hamburger-line" [class.open]="mobileMenuOpen()"></span>
+          <span class="hamburger-line" [class.open]="mobileMenuOpen()"></span>
+          <span class="hamburger-line" [class.open]="mobileMenuOpen()"></span>
+        </button>
+
+        <!-- Desktop Navigation Bar (Hidden on < 768px via CSS) -->
+        <nav class="desktop-nav" aria-label="Federation Navigation">
+          <a routerLink="/" class="header-link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            Home
+          </a>
+          <a routerLink="/clubs" class="header-link" routerLinkActive="active">
+            Directory
+          </a>
+          <a routerLink="/showcase" class="header-link" routerLinkActive="active">
+            Showcase
+          </a>
+          <a routerLink="/calendar" class="header-link" routerLinkActive="active">
+            Calendar
+          </a>
+          @if (authService.isClubLead()) {
+            <a routerLink="/lead" class="header-link" routerLinkActive="active">
+              Lead Workspace
+            </a>
+          }
+          @if (authService.isBoardOrAdmin()) {
+            <a routerLink="/admin" class="header-link" routerLinkActive="active">
+              Admin Portal
+            </a>
+          }
+
+          @if (authService.isAuthenticated()) {
+            <div class="user-session">
+              <span class="user-name">
+                {{ authService.userProfile()?.displayName || authService.currentUser()?.email }}
+              </span>
+              <span
+                class="badge"
+                [class.badge-approved]="authService.isAdmin() || authService.isBoard()"
+                [class.badge-pending]="authService.isClubLead()"
+                [class.badge-accent]="authService.userRole() === 'visitor'"
+              >
+                {{ authService.userRole() | uppercase }}
+              </span>
+              <button
+                type="button"
+                class="btn btn-outline btn-sm"
+                (click)="onSignOut()"
+                aria-label="Sign Out"
+              >
+                Sign Out
+              </button>
+            </div>
+          } @else {
+            <div class="auth-actions">
+              <a routerLink="/auth/login" class="btn btn-accent btn-sm">
+                Sign In
+              </a>
+            </div>
+          }
+        </nav>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Sheet (< 768px Viewports) -->
+    @if (mobileMenuOpen()) {
+      <div class="mobile-sheet-backdrop" (click)="closeMobileMenu()" aria-hidden="true"></div>
+      <nav id="mobile-nav-sheet" class="mobile-nav-sheet" aria-label="Mobile Navigation Menu">
+        <div class="mobile-nav-links">
+          <a
+            routerLink="/"
+            class="mobile-nav-item"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMobileMenu()"
+          >
+            <span class="mobile-item-icon" aria-hidden="true">&#127963;&#65039;</span>
+            <span class="mobile-item-text">Home</span>
+          </a>
+          <a
+            routerLink="/clubs"
+            class="mobile-nav-item"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span class="mobile-item-icon" aria-hidden="true">&#128101;</span>
+            <span class="mobile-item-text">Directory</span>
+          </a>
+          <a
+            routerLink="/showcase"
+            class="mobile-nav-item"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span class="mobile-item-icon" aria-hidden="true">&#128161;</span>
+            <span class="mobile-item-text">Showcase</span>
+          </a>
+          <a
+            routerLink="/calendar"
+            class="mobile-nav-item"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span class="mobile-item-icon" aria-hidden="true">&#128197;</span>
+            <span class="mobile-item-text">Calendar</span>
+          </a>
+          @if (authService.isClubLead()) {
+            <a
+              routerLink="/lead"
+              class="mobile-nav-item"
+              routerLinkActive="active"
+              (click)="closeMobileMenu()"
             >
-              {{ authService.userRole() | uppercase }}
-            </span>
-            <button
-              type="button"
-              class="btn btn-outline btn-sm"
-              (click)="onSignOut()"
-              aria-label="Sign Out"
+              <span class="mobile-item-icon" aria-hidden="true">&#128640;</span>
+              <span class="mobile-item-text">Lead Workspace</span>
+            </a>
+          }
+          @if (authService.isBoardOrAdmin()) {
+            <a
+              routerLink="/admin"
+              class="mobile-nav-item"
+              routerLinkActive="active"
+              (click)="closeMobileMenu()"
             >
-              Sign Out
-            </button>
-          </div>
-        } @else {
-          <div class="auth-actions">
-            <a routerLink="/auth/login" class="btn btn-accent btn-sm">
+              <span class="mobile-item-icon" aria-hidden="true">&#128737;&#65039;</span>
+              <span class="mobile-item-text">Admin Portal</span>
+            </a>
+          }
+        </div>
+
+        <div class="mobile-nav-auth">
+          @if (authService.isAuthenticated()) {
+            <div class="mobile-session-card">
+              <div class="mobile-session-user">
+                <span class="user-name">
+                  {{ authService.userProfile()?.displayName || authService.currentUser()?.email }}
+                </span>
+                <span
+                  class="badge"
+                  [class.badge-approved]="authService.isAdmin() || authService.isBoard()"
+                  [class.badge-pending]="authService.isClubLead()"
+                  [class.badge-accent]="authService.userRole() === 'visitor'"
+                >
+                  {{ authService.userRole() | uppercase }}
+                </span>
+              </div>
+              <button
+                type="button"
+                class="btn btn-outline mobile-auth-btn"
+                (click)="onSignOut()"
+              >
+                Sign Out
+              </button>
+            </div>
+          } @else {
+            <a
+              routerLink="/auth/login"
+              class="btn btn-accent mobile-auth-btn"
+              (click)="closeMobileMenu()"
+            >
               Sign In
             </a>
-          </div>
-        }
+          }
+        </div>
       </nav>
-    </div>
+    }
   </header>
 
   <main class="main-content" role="main">

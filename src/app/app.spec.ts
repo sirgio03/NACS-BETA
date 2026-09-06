@@ -42,4 +42,21 @@ describe('App', () => {
       'National Association of Campus Societies'
     );
   });
+
+  it('should toggle mobile navigation sheet on hamburger click', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(app.mobileMenuOpen()).toBeFalse();
+    app.toggleMobileMenu();
+    expect(app.mobileMenuOpen()).toBeTrue();
+    fixture.detectChanges();
+
+    const sheet = (fixture.nativeElement as HTMLElement).querySelector('.mobile-nav-sheet');
+    expect(sheet).toBeTruthy();
+
+    app.closeMobileMenu();
+    expect(app.mobileMenuOpen()).toBeFalse();
+  });
 });

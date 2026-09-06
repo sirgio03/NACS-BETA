@@ -18,8 +18,18 @@ export class App {
   readonly title = signal('National Association of Campus Societies');
   readonly currentEnv = signal(environment.environmentName);
   readonly isProd = signal(environment.production);
+  readonly mobileMenuOpen = signal(false);
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((open) => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
 
   async onSignOut(): Promise<void> {
+    this.closeMobileMenu();
     await this.authService.signOut();
   }
 }
