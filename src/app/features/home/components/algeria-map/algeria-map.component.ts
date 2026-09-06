@@ -24,6 +24,7 @@ export interface TooltipState {
   visible: boolean;
   x: number;
   y: number;
+  flipped?: boolean;
   stats: WilayaStats | null;
   regionName: string;
 }
@@ -162,6 +163,24 @@ export class AlgeriaMapComponent implements OnInit {
     return `${name} wilaya, ${clubsText}, ${eventsText}`;
   }
 
+  private calculateTooltipPosition(clientX: number, clientY: number): { x: number; y: number; flipped: boolean } {
+    const tooltipWidth = 270;
+    const tooltipHeight = 170;
+    const padding = 16;
+    const winWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+
+    // Clamp horizontally so tooltip never overflows the viewport
+    const minX = tooltipWidth / 2 + padding;
+    const maxX = Math.max(minX, winWidth - tooltipWidth / 2 - padding);
+    const clampedX = Math.max(minX, Math.min(clientX, maxX));
+
+    // Flip vertically if close to the top of viewport (prevents clipping)
+    const flipped = clientY < tooltipHeight + 40;
+    const y = flipped ? clientY + 20 : clientY - 12;
+
+    return { x: clampedX, y, flipped };
+  }
+
   // --- Mouse & Tooltip Handlers ---
   onPathMouseEnter(path: WilayaMapPath, event: MouseEvent): void {
     const stats = this.getWilayaStats(path.code) || {
@@ -172,10 +191,12 @@ export class AlgeriaMapComponent implements OnInit {
       hasUpcomingWithin7Days: false,
     };
 
+    const pos = this.calculateTooltipPosition(event.clientX, event.clientY);
     this.tooltip.set({
       visible: true,
-      x: event.clientX,
-      y: event.clientY,
+      x: pos.x,
+      y: pos.y,
+      flipped: pos.flipped,
       stats,
       regionName: this.getWilayaName(path),
     });
@@ -184,10 +205,12 @@ export class AlgeriaMapComponent implements OnInit {
   onPathMouseMove(event: MouseEvent): void {
     const current = this.tooltip();
     if (current.visible) {
+      const pos = this.calculateTooltipPosition(event.clientX, event.clientY);
       this.tooltip.set({
         ...current,
-        x: event.clientX,
-        y: event.clientY,
+        x: pos.x,
+        y: pos.y,
+        flipped: pos.flipped,
       });
     }
   }
@@ -214,11 +237,16 @@ export class AlgeriaMapComponent implements OnInit {
       hasUpcomingWithin7Days: false,
     };
 
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top;
+    const pos = this.calculateTooltipPosition(centerX, centerY);
+
     this.focusedWilayaCode.set(path.code);
     this.tooltip.set({
       visible: true,
-      x: rect.left + rect.width / 2,
-      y: rect.top,
+      x: pos.x,
+      y: pos.y,
+      flipped: pos.flipped,
       stats,
       regionName: this.getWilayaName(path),
     });
@@ -230,6 +258,7 @@ export class AlgeriaMapComponent implements OnInit {
       visible: false,
       x: 0,
       y: 0,
+      flipped: false,
       stats: null,
       regionName: '',
     });
@@ -251,61 +280,13 @@ export class AlgeriaMapComponent implements OnInit {
     this.searchQuery.set('');
   }
 
-  // --- Zoom & 3D Swoop Camera Transition ---
+  // --- Zoom & Smooth GPU Camera Transition ---
   toggleViewMode(): void {
-    if (this.isSwooping()) return;
-
     const nextMode = this.viewMode() === 'full' ? 'north' : 'full';
     const targetBoxStr = nextMode === 'north' ? this.northViewBox : this.fullViewBox;
 
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) {
-      this.viewMode.set(nextMode);
-      this.currentViewBox.set(targetBoxStr);
-      return;
-    }
-
-    const startBoxStr = this.currentViewBox();
-    const startNums = startBoxStr.split(' ').map(Number);
-    const targetNums = targetBoxStr.split(' ').map(Number);
-
-    const direction = nextMode === 'north' ? 'in' : 'out';
     this.viewMode.set(nextMode);
-    this.swoopDirection.set(direction);
-    this.isSwooping.set(true);
-
-    const duration = 800;
-    const startTime = performance.now();
-
-    const animateStep = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      // Smooth cubic ease-out
-      const ease = 1 - Math.pow(1 - progress, 3);
-
-      const curX = startNums[0] + (targetNums[0] - startNums[0]) * ease;
-      const curY = startNums[1] + (targetNums[1] - startNums[1]) * ease;
-      const curW = startNums[2] + (targetNums[2] - startNums[2]) * ease;
-      const curH = startNums[3] + (targetNums[3] - startNums[3]) * ease;
-
-      this.currentViewBox.set(
-        `${curX.toFixed(1)} ${curY.toFixed(1)} ${curW.toFixed(1)} ${curH.toFixed(1)}`
-      );
-
-      if (progress < 1) {
-        requestAnimationFrame(animateStep);
-      } else {
-        this.currentViewBox.set(targetBoxStr);
-        this.isSwooping.set(false);
-        this.swoopDirection.set(null); // Settles back to flat resting state
-      }
-    };
-
-    requestAnimationFrame(animateStep);
+    this.currentViewBox.set(targetBoxStr);
   }
 }
 

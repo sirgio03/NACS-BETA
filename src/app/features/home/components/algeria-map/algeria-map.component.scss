@@ -2,44 +2,45 @@
   display: block;
   width: 100%;
 
-  // Light theme tokens
-  --map-empty-fill: transparent;
-  --map-empty-stroke: #d8dae8;
-  --map-empty-hover-fill: rgba(216, 218, 232, 0.25);
-  --map-empty-hover-stroke: #b0b4d0;
+  // Light Theme Tokens - Distinct, high-contrast, beautiful borders
+  --map-empty-fill: #eef2f7;
+  --map-empty-stroke: #cbd5e1;
+  --map-empty-hover-fill: #e0e7ff;
+  --map-empty-hover-stroke: #6366f1;
 
   --map-club-fill: #0d0dff;
   --map-club-stroke: #0909c0;
-  --map-club-glow: rgba(13, 13, 255, 0.35);
+  --map-club-glow: rgba(13, 13, 255, 0.4);
 
-  --map-event-stroke: #ffd400;
-  --map-event-glow: rgba(255, 212, 0, 0.55);
+  --map-event-stroke: #f59e0b;
+  --map-event-glow: rgba(245, 158, 11, 0.55);
 
-  --map-stage-bg: var(--nacs-surface, #ffffff);
-  --map-stage-border: var(--nacs-border, #e2e8f0);
-  --map-badge-bg: var(--nacs-surface-alt, #f1f5f9);
-  --map-badge-color: var(--nacs-text, #0f172a);
+  --map-stage-bg: #ffffff;
+  --map-stage-border: #e2e8f0;
+  --map-badge-bg: #f1f5f9;
+  --map-badge-color: #0f172a;
 
-  --map-btn-bg: var(--nacs-surface, #ffffff);
-  --map-btn-border: var(--nacs-border, #e2e8f0);
-  --map-btn-color: var(--nacs-text, #0f172a);
+  --map-btn-bg: #ffffff;
+  --map-btn-border: #e2e8f0;
+  --map-btn-color: #0f172a;
   --map-btn-active-bg: #0d0dff;
-  --map-btn-active-glow: rgba(13, 13, 255, 0.3);
+  --map-btn-active-glow: rgba(13, 13, 255, 0.35);
 }
 
 :host-context([data-theme='dark']),
 [data-theme='dark'] :host {
-  --map-empty-fill: transparent;
-  --map-empty-stroke: #2a2d4a;
-  --map-empty-hover-fill: rgba(42, 45, 74, 0.4);
-  --map-empty-hover-stroke: #454b77;
+  // Dark Theme Tokens - Deep command center styling, high visibility
+  --map-empty-fill: #152033;
+  --map-empty-stroke: #2e3e5f;
+  --map-empty-hover-fill: #1e2e4a;
+  --map-empty-hover-stroke: #4b6a9e;
 
   --map-club-fill: #4d4dff;
-  --map-club-stroke: #6666ff;
-  --map-club-glow: rgba(77, 77, 255, 0.55);
+  --map-club-stroke: #7070ff;
+  --map-club-glow: rgba(77, 77, 255, 0.65);
 
   --map-event-stroke: #ffd400;
-  --map-event-glow: rgba(255, 212, 0, 0.65);
+  --map-event-glow: rgba(255, 212, 0, 0.75);
 
   --map-stage-bg: #0b1120;
   --map-stage-border: #1e293b;
@@ -161,6 +162,7 @@
 // --- Desktop & Tablet Map Wrapper (>= 768px) ---
 .desktop-map-wrapper {
   display: none;
+  position: relative;
 
   @media (min-width: 768px) {
     display: block;
@@ -214,7 +216,7 @@
     }
 
     &.indicator-open {
-      background: transparent;
+      background: var(--map-empty-fill);
       border: 1.5px dashed var(--map-empty-stroke);
     }
   }
@@ -270,14 +272,12 @@
   background: var(--map-stage-bg);
   border: 1px solid var(--map-stage-border);
   border-radius: 16px;
-  padding: 2rem 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  perspective: 1400px;
-  perspective-origin: 50% 25%;
 }
 
 .svg-canvas-container {
@@ -285,16 +285,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transform-style: preserve-3d;
-  transform-origin: 50% 25%;
-  transform: rotateX(0deg) translateZ(0);
+  transform-origin: 50% 0%;
+  transform: scale(1) translateY(0);
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 
-  &.is-swooping-in {
-    animation: swoopNorth 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  &.is-swooping-out {
-    animation: swoopOut 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  &.is-north {
+    transform: scale(1.82) translateY(24px);
   }
 }
 
@@ -326,42 +323,11 @@
   }
 }
 
-// 3D Cinematic Swoop Keyframes
-@keyframes swoopNorth {
-  0% {
-    transform: rotateX(0deg) translateZ(0) translateY(0);
-  }
-  38% {
-    transform: rotateX(32deg) translateZ(50px) translateY(-10px);
-  }
-  72% {
-    transform: rotateX(12deg) translateZ(16px) translateY(-3px);
-  }
-  100% {
-    transform: rotateX(0deg) translateZ(0) translateY(0);
-  }
-}
-
-@keyframes swoopOut {
-  0% {
-    transform: rotateX(0deg) translateZ(0) translateY(0);
-  }
-  38% {
-    transform: rotateX(28deg) translateZ(40px) translateY(8px);
-  }
-  72% {
-    transform: rotateX(10deg) translateZ(12px) translateY(2px);
-  }
-  100% {
-    transform: rotateX(0deg) translateZ(0) translateY(0);
-  }
-}
-
 // --- SVG Wilaya Path Styling ---
 .wilaya-region-path {
   fill: var(--map-empty-fill);
   stroke: var(--map-empty-stroke);
-  stroke-width: 1px;
+  stroke-width: 1.25px;
   stroke-linejoin: round;
   cursor: pointer;
   outline: none;
@@ -370,8 +336,8 @@
   &:hover {
     fill: var(--map-empty-hover-fill);
     stroke: var(--map-empty-hover-stroke);
-    stroke-width: 1.5px;
-    filter: brightness(1.2);
+    stroke-width: 1.75px;
+    filter: brightness(1.15);
   }
 
   &:focus,
@@ -379,27 +345,27 @@
     outline: none;
     stroke: #ffd400 !important;
     stroke-width: 2.5px !important;
-    filter: drop-shadow(0 0 8px rgba(255, 212, 0, 0.8)) brightness(1.2);
+    filter: drop-shadow(0 0 8px rgba(255, 212, 0, 0.85)) brightness(1.2);
   }
 
   &.has-club {
     fill: var(--map-club-fill);
     stroke: var(--map-club-stroke);
-    stroke-width: 1.25px;
-    filter: drop-shadow(0 0 6px var(--map-club-glow));
+    stroke-width: 1.5px;
+    filter: drop-shadow(0 0 7px var(--map-club-glow));
 
     &:hover {
-      filter: brightness(1.22) drop-shadow(0 0 10px var(--map-club-glow));
+      filter: brightness(1.2) drop-shadow(0 0 12px var(--map-club-glow));
     }
   }
 
   &.has-event {
     stroke: var(--map-event-stroke);
     stroke-width: 2.5px;
-    filter: drop-shadow(0 0 7px var(--map-event-glow));
+    filter: drop-shadow(0 0 8px var(--map-event-glow));
 
     &:hover {
-      filter: brightness(1.22) drop-shadow(0 0 10px var(--map-event-glow));
+      filter: brightness(1.22) drop-shadow(0 0 12px var(--map-event-glow));
     }
   }
 
@@ -407,10 +373,10 @@
     fill: var(--map-club-fill);
     stroke: var(--map-event-stroke);
     stroke-width: 2.5px;
-    filter: drop-shadow(0 0 6px var(--map-club-glow)) drop-shadow(0 0 7px var(--map-event-glow));
+    filter: drop-shadow(0 0 7px var(--map-club-glow)) drop-shadow(0 0 8px var(--map-event-glow));
 
     &:hover {
-      filter: brightness(1.25) drop-shadow(0 0 12px var(--map-club-glow)) drop-shadow(0 0 8px var(--map-event-glow));
+      filter: brightness(1.25) drop-shadow(0 0 14px var(--map-club-glow)) drop-shadow(0 0 10px var(--map-event-glow));
     }
   }
 
@@ -433,26 +399,31 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .svg-canvas-container.is-swooping-in,
-  .svg-canvas-container.is-swooping-out,
+  .svg-canvas-container {
+    transition: none !important;
+  }
   .wilaya-region-path.has-pulse {
     animation: none !important;
-    transform: none !important;
   }
 }
 
-// --- Floating Custom HTML Tooltip ---
+// --- Floating Custom HTML Tooltip (Positioned outside svg-stage) ---
 .custom-map-tooltip {
   position: fixed;
-  z-index: 9999;
+  z-index: 99999;
   pointer-events: none;
-  transform: translate(-50%, -115%);
+  transform: translate(-50%, -100%);
   width: 260px;
   background: var(--nacs-surface, #ffffff);
   border: 1px solid var(--nacs-border, #e2e8f0);
   border-radius: 10px;
   padding: 0.875rem 1rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.12s ease;
+
+  &.is-flipped {
+    transform: translate(-50%, 0);
+  }
 }
 
 .tooltip-header {

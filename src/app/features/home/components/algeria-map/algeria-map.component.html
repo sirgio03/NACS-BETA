@@ -79,15 +79,14 @@
       </button>
     </div>
 
-    <!-- The SVG Map with 3D Camera Perspective -->
+    <!-- The SVG Map Stage -->
     <div class="svg-stage" role="region" aria-label="Interactive SVG Map of Algeria">
       <div
         class="svg-canvas-container"
-        [class.is-swooping-in]="swoopDirection() === 'in'"
-        [class.is-swooping-out]="swoopDirection() === 'out'"
+        [class.is-north]="viewMode() === 'north'"
       >
         <svg
-          [attr.viewBox]="currentViewBox()"
+          viewBox="0 0 9968 9644.45"
           class="algeria-svg-canvas"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="false"
@@ -120,52 +119,53 @@
           </g>
         </svg>
       </div>
-
-      <!-- Custom Floating HTML Tooltip -->
-      @if (tooltip().visible && tooltip().stats; as tStats) {
-        <div
-          class="custom-map-tooltip"
-          role="tooltip"
-          [style.left.px]="tooltip().x"
-          [style.top.px]="tooltip().y"
-        >
-          <div class="tooltip-header">
-            <span class="tooltip-code">{{ tStats.code }}</span>
-            <strong class="tooltip-name">{{ tooltip().regionName }}</strong>
-          </div>
-
-          <div class="tooltip-body">
-            @if (tStats.clubCount === 0 && tStats.eventCount === 0) {
-              <div class="tooltip-empty-state">
-                <span class="empty-icon" aria-hidden="true">&#9873;</span>
-                <p class="empty-text">No clubs here yet — be the first.</p>
-              </div>
-            } @else {
-              <div class="tooltip-stat-row">
-                <span class="stat-dot dot-club" aria-hidden="true"></span>
-                <span class="stat-label">Verified Clubs:</span>
-                <strong class="stat-count">{{ tStats.clubCount }}</strong>
-              </div>
-              <div class="tooltip-stat-row">
-                <span class="stat-dot dot-event" aria-hidden="true"></span>
-                <span class="stat-label">Upcoming Events:</span>
-                <strong class="stat-count">{{ tStats.eventCount }}</strong>
-              </div>
-              @if (tStats.hasUpcomingWithin7Days) {
-                <div class="tooltip-pulse-notice">
-                  <span class="pulse-icon" aria-hidden="true">&#9889;</span>
-                  <span>Event happening this week</span>
-                </div>
-              }
-            }
-          </div>
-
-          <div class="tooltip-footer">
-            <span class="tooltip-action-hint">Click to explore directory &rarr;</span>
-          </div>
-        </div>
-      }
     </div>
+
+    <!-- Custom Floating HTML Tooltip (Outside svg-stage so overflow: hidden never clips it!) -->
+    @if (tooltip().visible && tooltip().stats; as tStats) {
+      <div
+        class="custom-map-tooltip"
+        [class.is-flipped]="tooltip().flipped"
+        role="tooltip"
+        [style.left.px]="tooltip().x"
+        [style.top.px]="tooltip().y"
+      >
+        <div class="tooltip-header">
+          <span class="tooltip-code">{{ tStats.code }}</span>
+          <strong class="tooltip-name">{{ tooltip().regionName }}</strong>
+        </div>
+
+        <div class="tooltip-body">
+          @if (tStats.clubCount === 0 && tStats.eventCount === 0) {
+            <div class="tooltip-empty-state">
+              <span class="empty-icon" aria-hidden="true">&#9873;</span>
+              <p class="empty-text">No clubs here yet — be the first.</p>
+            </div>
+          } @else {
+            <div class="tooltip-stat-row">
+              <span class="stat-dot dot-club" aria-hidden="true"></span>
+              <span class="stat-label">Verified Clubs:</span>
+              <strong class="stat-count">{{ tStats.clubCount }}</strong>
+            </div>
+            <div class="tooltip-stat-row">
+              <span class="stat-dot dot-event" aria-hidden="true"></span>
+              <span class="stat-label">Upcoming Events:</span>
+              <strong class="stat-count">{{ tStats.eventCount }}</strong>
+            </div>
+            @if (tStats.hasUpcomingWithin7Days) {
+              <div class="tooltip-pulse-notice">
+                <span class="pulse-icon" aria-hidden="true">&#9889;</span>
+                <span>Event happening this week</span>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="tooltip-footer">
+          <span class="tooltip-action-hint">Click to explore directory &rarr;</span>
+        </div>
+      </div>
+    }
 
     <p class="map-accessibility-note">
       Tip: You can press <kbd>Tab</kbd> to focus through wilayas on the map and press <kbd>Enter</kbd> to view directory clubs.
