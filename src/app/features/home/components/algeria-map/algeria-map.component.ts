@@ -13,7 +13,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { WilayaMapService } from '../../../../core/services/wilaya-map.service';
 import { WilayaStats, NationalReachSummary } from '../../../../core/models/wilaya-stats.model';
-import { ALGERIA_MAP_PATHS, ALGERIA_MAP_VIEWBOX, WilayaMapPath } from '../../../../core/data/algeria-map-paths.data';
+import {
+  ALGERIA_MAP_PATHS,
+  ALGERIA_MAP_VIEWBOX,
+  ALGERIA_MAP_NORTH_VIEWBOX,
+  WilayaMapPath,
+} from '../../../../core/data/algeria-map-paths.data';
 
 export interface TooltipState {
   visible: boolean;
@@ -36,8 +41,15 @@ export class AlgeriaMapComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
 
-  readonly viewBox = ALGERIA_MAP_VIEWBOX;
+  readonly fullViewBox = ALGERIA_MAP_VIEWBOX;
+  readonly northViewBox = ALGERIA_MAP_NORTH_VIEWBOX;
   readonly mapPaths: WilayaMapPath[] = ALGERIA_MAP_PATHS;
+
+  // --- Zoom & Camera State ---
+  readonly viewMode = signal<'full' | 'north'>('full');
+  readonly currentViewBox = signal<string>(ALGERIA_MAP_VIEWBOX);
+  readonly isSwooping = signal<boolean>(false);
+  readonly swoopDirection = signal<'in' | 'out' | null>(null);
 
   // --- Reactive Signals ---
   readonly isLoading = signal<boolean>(false);
@@ -238,4 +250,62 @@ export class AlgeriaMapComponent implements OnInit {
   clearSearch(): void {
     this.searchQuery.set('');
   }
+
+  // --- Zoom & 3D Swoop Camera Transition ---
+  toggleViewMode(): void {
+    if (this.isSwooping()) return;
+
+    const nextMode = this.viewMode() === 'full' ? 'north' : 'full';
+    const targetBoxStr = nextMode === 'north' ? this.northViewBox : this.fullViewBox;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      this.viewMode.set(nextMode);
+      this.currentViewBox.set(targetBoxStr);
+      return;
+    }
+
+    const startBoxStr = this.currentViewBox();
+    const startNums = startBoxStr.split(' ').map(Number);
+    const targetNums = targetBoxStr.split(' ').map(Number);
+
+    const direction = nextMode === 'north' ? 'in' : 'out';
+    this.viewMode.set(nextMode);
+    this.swoopDirection.set(direction);
+    this.isSwooping.set(true);
+
+    const duration = 800;
+    const startTime = performance.now();
+
+    const animateStep = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // Smooth cubic ease-out
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      const curX = startNums[0] + (targetNums[0] - startNums[0]) * ease;
+      const curY = startNums[1] + (targetNums[1] - startNums[1]) * ease;
+      const curW = startNums[2] + (targetNums[2] - startNums[2]) * ease;
+      const curH = startNums[3] + (targetNums[3] - startNums[3]) * ease;
+
+      this.currentViewBox.set(
+        `${curX.toFixed(1)} ${curY.toFixed(1)} ${curW.toFixed(1)} ${curH.toFixed(1)}`
+      );
+
+      if (progress < 1) {
+        requestAnimationFrame(animateStep);
+      } else {
+        this.currentViewBox.set(targetBoxStr);
+        this.isSwooping.set(false);
+        this.swoopDirection.set(null); // Settles back to flat resting state
+      }
+    };
+
+    requestAnimationFrame(animateStep);
+  }
 }
+

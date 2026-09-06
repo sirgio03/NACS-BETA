@@ -10,6 +10,7 @@ export interface WilayaMapPath {
 }
 
 export const ALGERIA_MAP_VIEWBOX = '0 0 9968 9644.45';
+export const ALGERIA_MAP_NORTH_VIEWBOX = '2156 0 6484 4184';
 
 export const ALGERIA_MAP_PATHS: WilayaMapPath[] = [
   {

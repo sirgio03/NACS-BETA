@@ -121,4 +121,37 @@ describe('AlgeriaMapComponent', () => {
     component.clearSearch();
     expect(component.searchQuery()).toBe('');
   });
+
+  it('should toggle viewMode and update viewBox on toggleViewMode', () => {
+    expect(component.viewMode()).toBe('full');
+    expect(component.currentViewBox()).toBe(component.fullViewBox);
+
+    component.toggleViewMode();
+    expect(component.viewMode()).toBe('north');
+  });
+
+  it('should immediately set target viewBox if prefers-reduced-motion is true', () => {
+    spyOn(window, 'matchMedia').and.callFake((query: string) => {
+      return {
+        matches: query === '(prefers-reduced-motion: reduce)',
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      } as any;
+    });
+
+    component.toggleViewMode();
+    expect(component.viewMode()).toBe('north');
+    expect(component.currentViewBox()).toBe(component.northViewBox);
+    expect(component.isSwooping()).toBeFalse();
+
+    component.toggleViewMode();
+    expect(component.viewMode()).toBe('full');
+    expect(component.currentViewBox()).toBe(component.fullViewBox);
+  });
 });
+
