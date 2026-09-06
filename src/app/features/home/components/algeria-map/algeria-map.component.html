@@ -1,0 +1,256 @@
+<div class="national-reach-container">
+  <!-- Section Header -->
+  <div class="reach-header">
+    <div class="institutional-badge">
+      <span class="badge-index" aria-hidden="true">04</span>
+      <span class="badge-label">National Network Reach</span>
+    </div>
+    <h2 class="reach-title">Where We Are</h2>
+    <p class="reach-subtitle">
+      Real-time footprint of verified university scientific societies, GDG Chapters, and approved inter-campus events across all 58 Wilayas.
+    </p>
+  </div>
+
+  <!-- Summary Metrics Bar -->
+  @if (reachSummary(); as summary) {
+    <div class="reach-metrics-grid" role="region" aria-label="National Reach Summary Metrics">
+      <div class="metric-card">
+        <span class="metric-value">{{ summary.activeWilayasCount }} / {{ summary.nationalWilayasTotal }}</span>
+        <span class="metric-label">Wilayas Represented</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-value">{{ summary.totalVerifiedClubs }}</span>
+        <span class="metric-label">Verified Societies</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-value">{{ summary.totalUpcomingEvents }}</span>
+        <span class="metric-label">Upcoming Events</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-value metric-status-live">100%</span>
+        <span class="metric-label">Student-Governed</span>
+      </div>
+    </div>
+  }
+
+  <!-- Interactive Map Stage (Visible on Tablet/Desktop >= 768px) -->
+  <div class="desktop-map-wrapper">
+    <!-- Map Legend -->
+    <div class="map-legend" role="note" aria-label="Map color legend">
+      <div class="legend-item">
+        <span class="legend-indicator indicator-club" aria-hidden="true"></span>
+        <span class="legend-text">Verified Club Society</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-indicator indicator-event" aria-hidden="true"></span>
+        <span class="legend-text">Upcoming Approved Event</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-indicator indicator-open" aria-hidden="true"></span>
+        <span class="legend-text">Open Region (No Club Yet)</span>
+      </div>
+    </div>
+
+    <!-- The SVG Map -->
+    <div class="svg-stage" role="region" aria-label="Interactive SVG Map of Algeria">
+      <svg
+        [attr.viewBox]="viewBox"
+        class="algeria-svg-canvas"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="false"
+      >
+        <g id="algeria-map-layers">
+          @for (path of mapPaths; track path.code) {
+            <path
+              [id]="'wilaya-path-' + path.code"
+              [attr.d]="path.d"
+              [attr.transform]="path.transform || null"
+              class="wilaya-region-path"
+              [class.has-club]="hasClub(path.code)"
+              [class.has-event]="hasEvent(path.code)"
+              [class.has-pulse]="hasUpcomingWithin7Days(path.code)"
+              [class.is-focused]="focusedWilayaCode() === path.code"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="getAriaLabel(path)"
+              (mouseenter)="onPathMouseEnter(path, $event)"
+              (mousemove)="onPathMouseMove($event)"
+              (mouseleave)="onPathMouseLeave()"
+              (focus)="onPathFocus(path, $event)"
+              (blur)="onPathBlur()"
+              (click)="selectWilaya(path.code)"
+              (keydown.enter)="selectWilaya(path.code)"
+              (keydown.space)="selectWilaya(path.code); $event.preventDefault()"
+            />
+          }
+        </g>
+      </svg>
+
+      <!-- Custom Floating HTML Tooltip -->
+      @if (tooltip().visible && tooltip().stats; as tStats) {
+        <div
+          class="custom-map-tooltip"
+          role="tooltip"
+          [style.left.px]="tooltip().x"
+          [style.top.px]="tooltip().y"
+        >
+          <div class="tooltip-header">
+            <span class="tooltip-code">{{ tStats.code }}</span>
+            <strong class="tooltip-name">{{ tooltip().regionName }}</strong>
+          </div>
+
+          <div class="tooltip-body">
+            @if (tStats.clubCount === 0 && tStats.eventCount === 0) {
+              <div class="tooltip-empty-state">
+                <span class="empty-icon" aria-hidden="true">&#9873;</span>
+                <p class="empty-text">No clubs here yet — be the first.</p>
+              </div>
+            } @else {
+              <div class="tooltip-stat-row">
+                <span class="stat-dot dot-club" aria-hidden="true"></span>
+                <span class="stat-label">Verified Clubs:</span>
+                <strong class="stat-count">{{ tStats.clubCount }}</strong>
+              </div>
+              <div class="tooltip-stat-row">
+                <span class="stat-dot dot-event" aria-hidden="true"></span>
+                <span class="stat-label">Upcoming Events:</span>
+                <strong class="stat-count">{{ tStats.eventCount }}</strong>
+              </div>
+              @if (tStats.hasUpcomingWithin7Days) {
+                <div class="tooltip-pulse-notice">
+                  <span class="pulse-icon" aria-hidden="true">&#9889;</span>
+                  <span>Event happening this week</span>
+                </div>
+              }
+            }
+          </div>
+
+          <div class="tooltip-footer">
+            <span class="tooltip-action-hint">Click to explore directory &rarr;</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <p class="map-accessibility-note">
+      Tip: You can press <kbd>Tab</kbd> to focus through wilayas on the map and press <kbd>Enter</kbd> to view directory clubs.
+    </p>
+  </div>
+
+  <!-- Mobile Searchable Fallback List (Visible on Mobile < 768px) -->
+  <div class="mobile-reach-wrapper" role="region" aria-label="Searchable List of Wilayas">
+    <div class="mobile-notice">
+      <span class="notice-icon" aria-hidden="true">&#128269;</span>
+      <p>Browse by Wilaya to discover verified student societies and events:</p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="mobile-search-bar">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          class="mobile-search-input"
+          placeholder="Search by wilaya name or code..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          aria-label="Filter wilayas list"
+        />
+        @if (searchQuery()) {
+          <button type="button" class="btn-clear-search" (click)="clearSearch()" aria-label="Clear search input">
+            &times;
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Quick Filter Tabs -->
+    <div class="mobile-filter-pills" role="tablist" aria-label="Filter wilaya status">
+      <button
+        type="button"
+        class="filter-pill"
+        [class.is-active]="selectedFilter() === 'all'"
+        (click)="setFilter('all')"
+      >
+        All (58)
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.is-active]="selectedFilter() === 'clubs'"
+        (click)="setFilter('clubs')"
+      >
+        With Clubs
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.is-active]="selectedFilter() === 'events'"
+        (click)="setFilter('events')"
+      >
+        With Events
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.is-active]="selectedFilter() === 'open'"
+        (click)="setFilter('open')"
+      >
+        Open Territories
+      </button>
+    </div>
+
+    <!-- Wilayas List -->
+    <div class="mobile-wilayas-list" role="list">
+      @for (w of mobileWilayas(); track w.code) {
+        <article
+          class="mobile-wilaya-card"
+          role="listitem"
+          (click)="selectWilaya(w.code)"
+          (keydown.enter)="selectWilaya(w.code)"
+          (keydown.space)="selectWilaya(w.code); $event.preventDefault()"
+          tabindex="0"
+          [attr.aria-label]="getAriaLabel({ code: w.code, name: w.name, nameAr: '', d: '' })"
+        >
+          <div class="card-left">
+            <span class="wilaya-code-badge">{{ w.code }}</span>
+            <div class="wilaya-meta">
+              <h3 class="wilaya-card-name">{{ w.name }}</h3>
+              @if (w.clubCount === 0 && w.eventCount === 0) {
+                <span class="wilaya-empty-tag">Open for first society</span>
+              } @else {
+                <div class="wilaya-tags">
+                  @if (w.clubCount > 0) {
+                    <span class="tag tag-club">{{ w.clubCount }} Club{{ w.clubCount === 1 ? '' : 's' }}</span>
+                  }
+                  @if (w.eventCount > 0) {
+                    <span class="tag tag-event">{{ w.eventCount }} Event{{ w.eventCount === 1 ? '' : 's' }}</span>
+                  }
+                  @if (w.hasUpcomingWithin7Days) {
+                    <span class="tag tag-pulse">This Week</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="card-right" aria-hidden="true">
+            <svg class="chevron-right" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </article>
+      } @empty {
+        <div class="mobile-no-results">
+          <p>No wilayas match "<strong>{{ searchQuery() }}</strong>"</p>
+          <button type="button" class="btn-reset-search" (click)="clearSearch()">
+            Reset Filter
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

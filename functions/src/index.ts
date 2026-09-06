@@ -10,5 +10,7 @@ export { approveEvent, rejectEvent, approveProject, rejectProject } from './hand
 export { onUserCreated } from './handlers/auth';
 export { assignUserRole } from './handlers/roles';
 export { exportEventIcs, exportEventsIcs } from './handlers/calendar';
+export { getWilayaReachStats } from './handlers/map';
 export { scheduledFirestoreBackup } from './backup/scheduled-backup';
+
 

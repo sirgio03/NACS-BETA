@@ -384,6 +384,139 @@ export const ALGERIAN_INSTITUTIONS_BY_WILAYA: WilayaInstitutions[] = [
       'Centre Universitaire de Relizane',
     ],
   },
+  {
+    wilayaCode: '49',
+    wilayaName: 'Timimoun',
+    institutions: [
+      'Centre Universitaire de Timimoun',
+    ],
+  },
+  {
+    wilayaCode: '50',
+    wilayaName: 'Bordj Badji Mokhtar',
+    institutions: [
+      'Centre Universitaire de Bordj Badji Mokhtar',
+    ],
+  },
+  {
+    wilayaCode: '51',
+    wilayaName: 'Ouled Djellal',
+    institutions: [
+      'Centre Universitaire de Ouled Djellal',
+    ],
+  },
+  {
+    wilayaCode: '52',
+    wilayaName: 'Béni Abbès',
+    institutions: [
+      'Centre Universitaire de Béni Abbès',
+    ],
+  },
+  {
+    wilayaCode: '53',
+    wilayaName: 'In Salah',
+    institutions: [
+      'Centre Universitaire d’In Salah',
+    ],
+  },
+  {
+    wilayaCode: '54',
+    wilayaName: 'In Guezzam',
+    institutions: [
+      'Centre Universitaire d’In Guezzam',
+    ],
+  },
+  {
+    wilayaCode: '55',
+    wilayaName: 'Touggourt',
+    institutions: [
+      'Centre Universitaire de Touggourt',
+    ],
+  },
+  {
+    wilayaCode: '56',
+    wilayaName: 'Djanet',
+    institutions: [
+      'Centre Universitaire de Djanet',
+    ],
+  },
+  {
+    wilayaCode: '57',
+    wilayaName: 'El M’Ghair',
+    institutions: [
+      'Centre Universitaire d’El M’Ghair',
+    ],
+  },
+  {
+    wilayaCode: '58',
+    wilayaName: 'El Meniaa',
+    institutions: [
+      'Centre Universitaire d’El Meniaa',
+    ],
+  },
+  {
+    wilayaCode: '59',
+    wilayaName: 'Aflou',
+    institutions: [
+      'Centre Universitaire d’Aflou',
+    ],
+  },
+  {
+    wilayaCode: '60',
+    wilayaName: 'El Abiodh Sidi Cheikh',
+    institutions: [
+      'Centre Universitaire d’El Abiodh Sidi Cheikh',
+    ],
+  },
+  {
+    wilayaCode: '61',
+    wilayaName: 'El Aricha',
+    institutions: [],
+  },
+  {
+    wilayaCode: '62',
+    wilayaName: 'El Kantara',
+    institutions: [],
+  },
+  {
+    wilayaCode: '63',
+    wilayaName: 'Barika',
+    institutions: [
+      'Centre Universitaire Elchahid Si Elhouas de Barika',
+    ],
+  },
+  {
+    wilayaCode: '64',
+    wilayaName: 'Bou Saâda',
+    institutions: [
+      'Centre Universitaire de Bou Saâda',
+    ],
+  },
+  {
+    wilayaCode: '65',
+    wilayaName: 'Bir El Ater',
+    institutions: [],
+  },
+  {
+    wilayaCode: '66',
+    wilayaName: 'Ksar El Boukhari',
+    institutions: [],
+  },
+  {
+    wilayaCode: '67',
+    wilayaName: 'Ksar Chellala',
+    institutions: [],
+  },
+  {
+    wilayaCode: '68',
+    wilayaName: 'Aïn Oussara',
+    institutions: [],
+  },
+  {
+    wilayaCode: '69',
+    wilayaName: 'M’saâd',
+    institutions: [],
+  },
 ];
 
 /**
@@ -417,4 +550,14 @@ export function getInstitutionsInWilaya(wilayaCodeOrName: string): string[] {
   );
   return match ? match.institutions : [];
 }
+
+/**
+ * Lookup WilayaInstitutions entry by wilaya code (e.g. '16', '31').
+ */
+export function getWilayaByCode(code: string): WilayaInstitutions | undefined {
+  if (!code) return undefined;
+  const formatted = code.padStart(2, '0');
+  return ALGERIAN_INSTITUTIONS_BY_WILAYA.find((w) => w.wilayaCode === formatted);
+}
+
 

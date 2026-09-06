@@ -88,4 +88,10 @@ describe('HomeComponent', () => {
     component.toggleFaq('faq-2');
     expect(component.expandedFaqId()).toBe('faq-2');
   });
+
+  it('should render the Algeria national reach map component', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const mapElement = compiled.querySelector('app-algeria-map');
+    expect(mapElement).toBeTruthy();
+  });
 });

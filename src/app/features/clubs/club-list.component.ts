@@ -13,6 +13,8 @@ import {
   WilayaInstitutions,
 } from '../../core/data/algerian-universities.data';
 
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-club-list',
   standalone: true,
@@ -22,6 +24,7 @@ import {
 })
 export class ClubListComponent implements OnInit {
   private readonly clubService = inject(ClubService);
+  private readonly route = inject(ActivatedRoute);
   readonly authService = inject(AuthService);
 
   // --- State Signals ---
@@ -64,6 +67,10 @@ export class ClubListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    const qWilaya = this.route.snapshot.queryParamMap.get('wilaya');
+    if (qWilaya) {
+      this.selectedWilaya = qWilaya.padStart(2, '0');
+    }
     this.loadInitialClubs();
   }
 
